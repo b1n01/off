@@ -1,22 +1,21 @@
 # Off
 
-The meta feed platform
+The meta feed platform.
 
 
 ## Setup
 
-This repository come with a docker environment that handles all the setup, just
-enable the `.env` files with:
-
-```bash
-cp deno/.env.example deno/.env
-cp next/.env.example next/.env
-```
-
-Fill them accordingly and start containers with:
+This repository come with docker, setup and run the environmint with: 
 
 ```bash
 docker compose up -d
+```
+
+To edit the environment variables create the two `.env.local` files with:
+
+```bash
+cp deno/.env deno/.env.local
+cp next/.env next/.env.local
 ```
 
 ### Visual Sudio Code
