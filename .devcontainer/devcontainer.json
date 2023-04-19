@@ -1,0 +1,50 @@
+{
+  "name": "Off",
+
+  // Update the 'dockerComposeFile' list if you have more compose files or use different names.
+  // The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
+  "dockerComposeFile": [
+    "../docker-compose.yml",
+    "docker-compose.yml"
+  ],
+
+  // The 'service' property is the name of the service for the container that VS Code should
+  // use. Update this value and .devcontainer/docker-compose.yml to the real service name.
+  "service": "devcontainer",
+
+  // The optional 'workspaceFolder' property is the path VS Code should open by default when
+  // connected. This is typically a file mount in .devcontainer/docker-compose.yml
+  "workspaceFolder": "/usr/src",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    
+    // Configure properties specific to VS Code.
+    "vscode": {
+    
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+    
+        // Enable Deno on sub-paths
+        "deno.enablePaths": ["./deno"],
+    
+        // Enables Deno linting for the project
+        "deno.lint": true,
+    
+        // Sets Deno as the default formatter
+        "[typescript][javascript][javascriptreact][typescriptreact]": {
+          "editor.defaultFormatter": "denoland.vscode-deno",
+          "editor.formatOnSave": true
+        }
+      },
+
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "denoland.vscode-deno"
+      ]
+    }
+  },
+
+  // Uncomment the next line if you want to keep your containers running after VS Code shuts down.
+  "shutdownAction": "none"
+}

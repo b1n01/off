@@ -1,0 +1,12 @@
+services:
+  devcontainer:
+    container_name: off-devcontainer
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - .:/usr/src:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: /bin/bash
+    command: -c "while sleep 1000; do :; done"

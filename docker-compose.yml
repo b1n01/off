@@ -1,0 +1,44 @@
+services:
+  deno:
+    container_name: off-deno
+    image: lukechannings/deno:v1.31.3
+    # image: denoland/deno:1.31.3 # use this when official docker image for arm64 will be released, @see https://github.com/denoland/deno_docker/issues/100
+    ports:
+      - 3001:3000
+    depends_on:
+      mongo:
+        condition: service_healthy
+    working_dir: /usr/src
+    volumes:
+      - ./deno:/usr/src:cached
+    entrypoint: /bin/bash
+    command: -c "deno cache main.ts && deno run --allow-all --watch main.ts" 
+
+  next:
+    container_name: off-next
+    image: node:19-alpine
+    ports:
+      - 3000:3000
+    depends_on:
+      - deno
+    working_dir: /usr/src
+    volumes:
+     - ./next:/usr/src:cached
+    command: /bin/ash -c "npm i && npm run dev"
+
+  mongo:
+    container_name: off-mongo
+    image: mongo:6.0.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - off-mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://user:password@mongo:27017/ --quiet
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  off-mongo-data:
