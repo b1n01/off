@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(firewall);
 app.use(userProvider);
 
-const mongo = new MongoClient("mongodb://user:password@mongo:27017/");
+const mongo = new MongoClient(ENV.MONGO_URI);
 await mongo.connect();
 const db = mongo.db("off");
 
