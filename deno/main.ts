@@ -24,8 +24,7 @@ async function firewall(req: Request, res: Request, next: Callback) {
 
     if (!decoded) throw new Deno.errors.PermissionDenied();
 
-    const { id, provider } = decoded.data;
-    req.session = { id, provider };
+    req.session = decoded.data;
     next();
   } catch (_error) {
     res.status(401).json({ message: "Unauthenticated" });
