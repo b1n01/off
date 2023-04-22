@@ -72,4 +72,29 @@ app.post("/adapter", async (req: Request, res: Response) => {
   res.json({ message: "ok" });
 });
 
+app.post("/facebook-api", async (req: Request, res: Response) => {
+  const provider = req.user.providers[0];
+
+  const data = await fetch(
+    `https://graph.facebook.com/me/posts?fields=
+    id,
+    message,
+    created_time,
+    type,
+    full_picture,
+    permalink_url
+    &access_token=${provider.accessToken}`,
+  );
+
+  const posts = await data.json();
+
+  const users = db.collection("users");
+  await users.updateOne(
+    { _id: req.user._id },
+    { $set: { posts: posts.data } },
+  );
+
+  res.json({ message: "ok" });
+});
+
 app.listen(3000);

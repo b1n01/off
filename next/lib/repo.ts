@@ -27,7 +27,7 @@ async function send(
   });
 
   if (!response.ok) {
-    console.log("Error:", endpoint);
+    console.log("Error:", endpoint, response.status);
     throw new Error("Failed to fetch data");
   }
 
@@ -51,6 +51,14 @@ const repo = {
         method: "POST",
         body: JSON.stringify(data),
       },
+    });
+  },
+
+  /** Get data from facebook api test */
+  getFacebookApi: async function () {
+    return send({
+      endpoint: new URL("facebook-api", API_URL).href,
+      options: { method: "POST" },
     });
   },
 };
