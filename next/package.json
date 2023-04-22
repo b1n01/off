@@ -17,6 +17,7 @@
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",
     "passport-github": "^1.1.0",
+    "passport-google-oauth20": "^2.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "5.0.4",
@@ -28,6 +29,7 @@
     "@types/passport": "^1.0.12",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-github": "^1.1.7",
+    "@types/passport-google-oauth20": "^2.0.11",
     "@types/react": "18.0.33",
     "@types/react-dom": "18.0.11",
     "@types/uuid": "^9.0.1"

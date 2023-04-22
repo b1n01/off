@@ -17,6 +17,9 @@ export default async function Login() {
       <div>
         <button onClick={() => login("facebook")}>Facebook</button>
       </div>
+      <div>
+        <button onClick={() => login("google")}>Google</button>
+      </div>
     </main>
   );
 }

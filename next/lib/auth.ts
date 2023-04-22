@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { NextHandler } from "next-connect";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GitHubStrategy } from "passport-github";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
 import { getToken, setData } from "lib/session";
 import useRepo from "lib/repo";
@@ -13,6 +14,10 @@ const FACEBOOK_CREDENTIALS = {
 const GITHUB_CREDENTIALS = {
   clientID: process.env.GITHUB_APP_ID as string,
   clientSecret: process.env.GITHUB_APP_SECRET as string,
+};
+const GOOGLE_CREDENTIALS = {
+  clientID: process.env.GOOGLE_APP_ID as string,
+  clientSecret: process.env.GOOGLE_APP_SECRET as string,
 };
 
 const authPassport = new passport.Passport();
@@ -32,6 +37,13 @@ authPassport.use(
   }, function (_accessToken, _refreshToken, profile, callback) {
     return callback(null, { id: profile.id, provider: "github" });
   }),
+).use(
+  new GoogleStrategy({
+    ...GOOGLE_CREDENTIALS,
+    callbackURL: "/api/google/auth/callback",
+  }, function (_accessToken, _refreshToken, profile, callback) {
+    return callback(null, { id: profile.id, provider: "google" });
+  }),
 );
 
 providerPassport.use(
@@ -45,6 +57,13 @@ providerPassport.use(
   new GitHubStrategy({
     ...GITHUB_CREDENTIALS,
     callbackURL: "/api/github/adapter/callback",
+  }, function (accessToken, _refreshToken, _profile, callback) {
+    return callback(null, { accessToken });
+  }),
+).use(
+  new GoogleStrategy({
+    ...GOOGLE_CREDENTIALS,
+    callbackURL: "/api/google/adapter/callback",
   }, function (accessToken, _refreshToken, _profile, callback) {
     return callback(null, { accessToken });
   }),
@@ -70,7 +89,7 @@ async function parseQuery(request: NextApiRequest) {
   };
 
   const scopes = ["auth", "adapter"];
-  const providers = ["facebook", "github"];
+  const providers = ["facebook", "github", "google"];
   if (scopes.includes(scope) && providers.includes(provider)) {
     return { scope, provider };
   }
@@ -87,7 +106,15 @@ export async function authenticate(
   const params = await parseQuery(req);
   if (params) {
     const passport = await getPassport(params.scope);
-    const options = { session: false };
+    let options = { session: false } as {
+      session: boolean;
+      scope?: Array<string>;
+    };
+
+    if (params.provider === "google") {
+      options.scope = ["profile"];
+    }
+
     passport.authenticate(params.provider, options)(req, res, next);
   } else {
     res.redirect("/404");
