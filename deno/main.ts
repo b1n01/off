@@ -36,7 +36,14 @@ async function userProvider(req: Request, _res: Request, next: Callback) {
     {
       findAndModify: "users",
       query: req.session,
-      update: { $setOnInsert: { posts: [], follows: [], providers: [] } },
+      update: {
+        $setOnInsert: {
+          posts: [],
+          follows: [],
+          providers: [],
+          uuid: crypto.randomUUID(),
+        },
+      },
       upsert: true,
       new: true,
     },
@@ -130,6 +137,32 @@ app.post("/github-api", async (req: Request, res: Response) => {
     { $push: { posts: events } },
   );
 
+  res.json({ message: "ok" });
+});
+
+app.get("/users-to-follow", async (req: Request, res: Response) => {
+  const users = db.collection("users");
+
+  const usersToFollow = await users.find({ uuid: { $ne: req.user.uuid } })
+    .project({ _id: 0, uuid: 1 })
+    .toArray();
+
+  const data = usersToFollow.map((user) => ({
+    uuid: user.uuid,
+    following: req.user.follows.includes(user.uuid),
+  }));
+
+  res.json(data);
+});
+
+app.post("/users-to-follow", async (req: Request, res: Response) => {
+  const uuid = req.body.uuid as string;
+  const users = db.collection("users");
+
+  await users.updateOne(
+    { _id: req.user._id },
+    { $push: { follows: uuid } },
+  );
   res.json({ message: "ok" });
 });
 

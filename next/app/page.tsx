@@ -13,10 +13,16 @@ export default async function Home() {
     return (
       <main>
         <p>Here is the session token: {JSON.stringify(token)}</p>
-        <p>Home, here the session data: {JSON.stringify(session)}</p>
+        <p>Here the session data: {JSON.stringify(session)}</p>
+        <hr></hr>
         <div>
-          <p>Feed:</p>
-          <pre><code className="language-json">{JSON.stringify(user.posts, null, 4)}</code></pre>
+          <p>You follows:</p>
+          <pre><code>{JSON.stringify(user.follows, null, 4)}</code></pre>
+        </div>
+        <hr></hr>
+        <div>
+          Your posts:
+          <pre><code>{JSON.stringify(user.posts, null, 4)}</code></pre>
         </div>
       </main>
     );

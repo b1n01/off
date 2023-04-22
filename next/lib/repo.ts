@@ -62,10 +62,22 @@ const repo = {
     });
   },
 
+  /** Get data from github api test */
   getGithubApi: async function () {
     return send({
       endpoint: new URL("github-api", API_URL).href,
       options: { method: "POST" },
+    });
+  },
+
+  getUsersToFollow: async function () {
+    return send({ endpoint: new URL("users-to-follow", API_URL).href });
+  },
+
+  followUser: async function ({ uuid }: { uuid: string }) {
+    return send({
+      endpoint: new URL("users-to-follow", API_URL).href,
+      options: { method: "POST", body: JSON.stringify({ uuid }) },
     });
   },
 };
