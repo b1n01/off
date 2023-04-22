@@ -61,6 +61,13 @@ const repo = {
       options: { method: "POST" },
     });
   },
+
+  getGithubApi: async function () {
+    return send({
+      endpoint: new URL("github-api", API_URL).href,
+      options: { method: "POST" },
+    });
+  },
 };
 
 /**

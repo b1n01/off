@@ -73,7 +73,13 @@ app.post("/adapter", async (req: Request, res: Response) => {
 });
 
 app.post("/facebook-api", async (req: Request, res: Response) => {
-  const provider = req.user.providers[0];
+  const provider = req.user.providers.find((item: { provider: string }) =>
+    item.provider === "facebook"
+  );
+
+  if (!provider) {
+    res.status(404).json({ message: "Facebook provider not found" });
+  }
 
   const data = await fetch(
     `https://graph.facebook.com/me/posts?fields=
@@ -91,7 +97,37 @@ app.post("/facebook-api", async (req: Request, res: Response) => {
   const users = db.collection("users");
   await users.updateOne(
     { _id: req.user._id },
-    { $set: { posts: posts.data } },
+    { $push: { posts: posts.data } },
+  );
+
+  res.json({ message: "ok" });
+});
+
+app.post("/github-api", async (req: Request, res: Response) => {
+  const provider = req.user.providers.find((item: { provider: string }) =>
+    item.provider === "github"
+  );
+
+  if (!provider) {
+    res.status(404).json({ message: "Github provider not found" });
+  }
+
+  const URL = "https://api.github.com";
+  const options = {
+    headers: { "Authorization": `Bearer ${provider.accessToken}` },
+  };
+
+  const userReq = await fetch(`${URL}/user`, options);
+  const user = await userReq.json();
+
+  const eventsReq = await fetch(`${URL}/users/${user.login}/events`, options);
+  const events = await eventsReq.json();
+
+  console.log("Github", user, provider.accessToken);
+  const users = db.collection("users");
+  await users.updateOne(
+    { _id: req.user._id },
+    { $push: { posts: events } },
   );
 
   res.json({ message: "ok" });
