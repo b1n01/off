@@ -25,3 +25,8 @@ folder. It installs the VS Code engine in a container and configures all
 needed plugins to use all Typescript and Deno features (autocomplete, auto 
 format, ecc.). To use it install the `ms-vscode-remote.remote-containers`
 extention, VS Code should recognize the dev container and prompt to open it.
+
+## Conventions
+
+- Use async/await precautionary
+- Use object literal as function parameters
