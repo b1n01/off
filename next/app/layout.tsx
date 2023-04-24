@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import Header from "app/Header";
 
 export default async function Layout(
   { children }: { children: React.ReactNode },
@@ -7,15 +7,7 @@ export default async function Layout(
   return (
     <html>
       <body>
-        <nav>
-          <Link href="/">home</Link>
-          {" | "}
-          <Link href="/auth/login">login page</Link>
-          {" | "}
-          <Link href="/provider/login">providers page</Link>
-          {" | "}
-          <Link href="/users-to-follow">users to follow page</Link>
-        </nav>
+        <Header />
         {children}
       </body>
     </html>
