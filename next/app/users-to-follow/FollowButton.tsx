@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRepo } from "lib/client/repo";
 
 export default function FollowButton(
   { uuid, following }: { uuid: string; following: boolean },
@@ -7,14 +8,18 @@ export default function FollowButton(
   const [saving, setSaving] = useState(false);
   const [isFollowing, setFollowing] = useState(following);
 
-  const follow = async () => {
+  const follow = () => {
+    const set = async () => {
+      const repo = await useRepo();
+      return repo.followUser({ uuid });
+    };
+
     setSaving(true);
-    await fetch("/repo/proxy/followUser", {
-      method: "POST",
-      body: JSON.stringify({ uuid }),
+
+    set().then(() => {
+      setSaving(false);
+      setFollowing(true);
     });
-    setSaving(false);
-    setFollowing(true);
   };
 
   const button = <button onClick={follow}>follow</button>;

@@ -130,7 +130,6 @@ app.post("/github-api", async (req: Request, res: Response) => {
   const eventsReq = await fetch(`${URL}/users/${user.login}/events`, options);
   const events = await eventsReq.json();
 
-  console.log("Github", user, provider.accessToken);
   const users = db.collection("users");
   await users.updateOne(
     { _id: req.user._id },

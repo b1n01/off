@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getData, getToken } from "lib/session";
-import useRepo from "lib/repo";
+import { getData, getToken } from "lib/server/session";
+import { useRepo } from "lib/server/repo";
 
 export default async function Home() {
   const repo = await useRepo();
@@ -9,7 +9,6 @@ export default async function Home() {
 
   try {
     const user = await repo.getUser();
-
     return (
       <main>
         <p>Here is the session token: {JSON.stringify(token)}</p>

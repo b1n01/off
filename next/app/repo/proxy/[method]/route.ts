@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import useRepo from "lib/repo";
+import { useRepo } from "lib/server/repo";
 
 async function kebabToCamel({ data }: { data: string }) {
   return data.replace(/-./g, (m) => m.toUpperCase()[1]);
@@ -7,7 +7,7 @@ async function kebabToCamel({ data }: { data: string }) {
 
 async function handle(request: NextRequest) {
   const repo: Record<string, any> = await useRepo();
-  const callables = Object.getOwnPropertyNames(repo);
+  const callables = Object.keys(repo);
   const methodKebab = new URL(request.url).pathname.replace("/repo/proxy/", "");
   const method = await kebabToCamel({ data: methodKebab });
 

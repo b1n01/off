@@ -1,4 +1,4 @@
-import { getCookie, setCookie } from "lib/cookie";
+import { getCookie, setCookie } from "lib/server/cookie";
 import { decode, encode } from "lib/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 

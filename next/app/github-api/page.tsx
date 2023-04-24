@@ -1,4 +1,4 @@
-import useRepo from "lib/repo";
+import { useRepo } from "lib/server/repo";
 
 export default async function Home() {
   const repo = await useRepo();

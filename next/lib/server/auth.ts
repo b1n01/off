@@ -4,8 +4,8 @@ import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GitHubStrategy } from "passport-github";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
-import { getToken, setData } from "lib/session";
-import useRepo from "lib/repo";
+import { setData } from "lib/server/session";
+import { useRepoFromPages } from "lib/server/repo";
 
 const FACEBOOK_CREDENTIALS = {
   clientID: process.env.FACEBOOK_APP_ID as string,
@@ -141,7 +141,7 @@ export async function authenticated(
       await setData({ value, response });
     } else {
       const accessToken = request.user.accessToken;
-      const repo = await useRepo(async () => getToken({ request }));
+      const repo = await useRepoFromPages({ request });
       await repo.sendAdapter({ accessToken, provider });
     }
 
