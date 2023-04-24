@@ -3,9 +3,9 @@ import { getData, getToken } from "lib/server/session";
 import { useRepo } from "lib/server/repo";
 
 export default async function Home() {
-  const repo = await useRepo();
-  const session = await getData();
-  const token = await getToken();
+  const repo = useRepo();
+  const session = getData();
+  const token = getToken();
 
   try {
     const user = await repo.getUser();

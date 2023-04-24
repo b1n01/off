@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextApiRequest, NextApiResponse } from "next";
 
 /** Set a cookie */
-export async function setCookie(
+export function setCookie(
   { name, value, response }: {
     name: string;
     value: string;
@@ -21,7 +21,7 @@ export async function setCookie(
 }
 
 /** Returns the value of a cookie */
-export async function getCookie(
+export function getCookie(
   { name, request }: { name: string; request?: NextApiRequest },
 ) {
   if (request) {

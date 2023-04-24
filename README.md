@@ -28,5 +28,5 @@ extention, VS Code should recognize the dev container and prompt to open it.
 
 ## Conventions
 
-- Use async/await precautionary
+- ~~Use async/await precautionary~~
 - Use object literal as function parameters

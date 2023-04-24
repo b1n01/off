@@ -1,14 +1,14 @@
 import type { TokenFetcher } from "types/main";
 
-export async function useRepo(
+export function useRepo(
   { fetcher, url }: { fetcher: TokenFetcher; url: string },
 ) {
   /** Get common fetch options */
-  async function getOptions() {
+  function getOptions() {
     return {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${await fetcher()}`,
+        "Authorization": `Bearer ${fetcher()}`,
       },
     };
   }
@@ -17,7 +17,7 @@ export async function useRepo(
   async function send(
     { endpoint, options }: { endpoint: string; options?: object },
   ): Promise<object> {
-    const defaultOptions = await getOptions();
+    const defaultOptions = getOptions();
 
     const response = await fetch(endpoint, {
       ...defaultOptions,
@@ -28,17 +28,17 @@ export async function useRepo(
       throw new Error("Failed to fetch data");
     }
 
-    return await response.json();
+    return response.json();
   }
 
   return {
     /** Gets the logged user */
-    getUser: async function () {
+    getUser: function () {
       return send({ endpoint: url });
     },
 
     /** Adds an adapter to the logged user */
-    sendAdapter: async function (
+    sendAdapter: function (
       data: { accessToken: string; provider: string },
     ) {
       return send({
@@ -51,7 +51,7 @@ export async function useRepo(
     },
 
     /** Get data from facebook api test */
-    getFacebookApi: async function () {
+    getFacebookApi: function () {
       return send({
         endpoint: new URL("facebook-api", url).href,
         options: { method: "POST" },
@@ -59,7 +59,7 @@ export async function useRepo(
     },
 
     /** Get data from github api test */
-    getGithubApi: async function () {
+    getGithubApi: function () {
       return send({
         endpoint: new URL("github-api", url).href,
         options: { method: "POST" },
@@ -67,12 +67,12 @@ export async function useRepo(
     },
 
     /** Get a list of user to follow */
-    getUsersToFollow: async function () {
+    getUsersToFollow: function () {
       return send({ endpoint: new URL("users-to-follow", url).href });
     },
 
     /** Follow a user */
-    followUser: async function ({ uuid }: { uuid: string }) {
+    followUser: function ({ uuid }: { uuid: string }) {
       return send({
         endpoint: new URL("users-to-follow", url).href,
         options: { method: "POST", body: JSON.stringify({ uuid }) },

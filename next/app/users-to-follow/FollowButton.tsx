@@ -9,20 +9,14 @@ export default function FollowButton(
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [isFollowing, setFollowing] = useState(following);
+  const repo = useRepo();
 
-  const follow = () => {
-    const set = async () => {
-      const repo = await useRepo();
-      return repo.followUser({ uuid });
-    };
-
+  const follow = async () => {
     setSaving(true);
-
-    set().then(() => {
-      setSaving(false);
-      setFollowing(true);
-      router.refresh();
-    });
+    await repo.followUser({ uuid });
+    setSaving(false);
+    setFollowing(true);
+    router.refresh();
   };
 
   const button = <button onClick={follow}>follow</button>;

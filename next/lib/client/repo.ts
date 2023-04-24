@@ -4,9 +4,9 @@ import { useRepo as useMainRepo } from "lib/repo";
  * This is a proxy of the real repo. It calls an API that executes the real
  * repo loginc and returns the result.
  */
-export async function useRepo() {
-  const fakeFetcher = async () => "";
-  const mainRepo = await useMainRepo({ fetcher: fakeFetcher, url: "" });
+export function useRepo() {
+  const fakeFetcher = () => "";
+  const mainRepo = useMainRepo({ fetcher: fakeFetcher, url: "" });
 
   const repo = {} as typeof mainRepo;
   for (const method of Object.getOwnPropertyNames(mainRepo)) {

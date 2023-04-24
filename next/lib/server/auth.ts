@@ -70,7 +70,7 @@ providerPassport.use(
 );
 
 /** Gets the correct passport based on the scope */
-async function getPassport(scope: string) {
+function getPassport(scope: string) {
   switch (scope) {
     case "auth":
       return authPassport;
@@ -82,7 +82,7 @@ async function getPassport(scope: string) {
 }
 
 /** Parses and validates query params. Returns null if params are invalid */
-async function parseQuery(request: NextApiRequest) {
+function parseQuery(request: NextApiRequest) {
   const { scope, provider } = request.query as {
     scope: string;
     provider: string;
@@ -98,14 +98,14 @@ async function parseQuery(request: NextApiRequest) {
 }
 
 /** Middleware that inits the passport auth flow */
-export async function authenticate(
+export function authenticate(
   req: NextApiRequest,
   res: NextApiResponse,
   next: NextHandler,
 ) {
-  const params = await parseQuery(req);
+  const params = parseQuery(req);
   if (params) {
-    const passport = await getPassport(params.scope);
+    const passport = getPassport(params.scope);
     let options = { session: false } as {
       session: boolean;
       scope?: Array<string>;
@@ -127,7 +127,7 @@ export async function authenticated(
   response: NextApiResponse,
   next: NextHandler,
 ) {
-  const params = await parseQuery(request);
+  const params = parseQuery(request);
 
   if (params) {
     const { scope, provider } = params;
@@ -141,7 +141,7 @@ export async function authenticated(
       await setData({ value, response });
     } else {
       const accessToken = request.user.accessToken;
-      const repo = await useRepoFromPages({ request });
+      const repo = useRepoFromPages({ request });
       await repo.sendAdapter({ accessToken, provider });
     }
 

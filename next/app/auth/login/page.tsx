@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-export default async function Login() {
+export default function Login() {
   const router = useRouter();
 
   function login(provider: string) {

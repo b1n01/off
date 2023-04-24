@@ -1,9 +1,7 @@
-import React from "react";
+import { ReactNode } from "react";
 import Header from "app/Header";
 
-export default async function Layout(
-  { children }: { children: React.ReactNode },
-) {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html>
       <body>

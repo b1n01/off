@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useRepo } from "lib/server/repo";
 
-async function kebabToCamel({ data }: { data: string }) {
-  return data.replace(/-./g, (m) => m.toUpperCase()[1]);
-}
-
-async function handle(request: NextRequest) {
-  const repo: Record<string, any> = await useRepo();
-  const callables = Object.keys(repo);
-  const methodKebab = new URL(request.url).pathname.replace("/repo/proxy/", "");
-  const method = await kebabToCamel({ data: methodKebab });
+async function handle({ request }: { request: NextRequest }) {
+  const repo: Record<string, any> = useRepo();
+  const callables = Object.getOwnPropertyNames(repo);
+  const method = new URL(request.url).pathname.replace("/repo/proxy/", "");
 
   if (!callables.includes(method)) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -25,10 +20,18 @@ async function handle(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-export async function GET(request: NextRequest) {
-  return handle(request);
+export function GET(request: NextRequest) {
+  return handle({ request });
 }
 
-export async function POST(request: NextRequest) {
-  return handle(request);
+export function POST(request: NextRequest) {
+  return handle({ request });
+}
+
+export function PUT(request: NextRequest) {
+  return handle({ request });
+}
+
+export function DELETE(request: NextRequest) {
+  return handle({ request });
 }

@@ -3,7 +3,7 @@ import { useRepo } from "lib/server/repo";
 import FollowButton from "app/users-to-follow/FollowButton";
 
 export default async function Home() {
-  const repo = await useRepo();
+  const repo = useRepo();
 
   try {
     const data = await repo.getUsersToFollow() as [

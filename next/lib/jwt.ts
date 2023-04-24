@@ -8,8 +8,8 @@ import { v4 as uuid } from "uuid";
  */
 
 /** Get a derived key */
-async function getDerivedKey(secret: string) {
-  return await hkdf("sha256", secret, "", "Off Encryption Key", 32);
+function getDerivedKey(secret: string) {
+  return hkdf("sha256", secret, "", "Off Encryption Key", 32);
 }
 
 /** Create an encripted JWT with the given payload */
@@ -21,7 +21,7 @@ export async function encode(
   const maxAge = 30 * 24 * 60 * 60; // 30 days
   const derivedKey = await getDerivedKey(secret);
 
-  return await new EncryptJWT(payload)
+  return new EncryptJWT(payload)
     .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
     .setIssuedAt()
     .setExpirationTime(now + maxAge)
