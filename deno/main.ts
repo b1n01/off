@@ -15,6 +15,8 @@ app.use(userProvider);
 const mongo = new mongoClient(ENV.MONGO_URI);
 await mongo.connect();
 const db = mongo.db("off");
+const users = db.collection("users");
+users.createIndex({ uuid: 1 });
 
 async function firewall(req: Request, res: Response, next: NextFunction) {
   try {
