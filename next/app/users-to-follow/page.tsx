@@ -6,10 +6,7 @@ export default async function Home() {
   const repo = useRepo();
 
   try {
-    const data = await repo.getUsersToFollow() as [
-      { uuid: string; following: boolean },
-    ];
-
+    const data = await repo.getUsersToFollow();
     const users = data.map((user) => (
       <li key={user.uuid}>
         uuid: {user.uuid} <FollowButton {...user} />

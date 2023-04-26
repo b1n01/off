@@ -24,6 +24,7 @@ services:
     working_dir: /usr/src
     volumes:
      - ./next:/usr/src:cached
+     - ./deno/types.d.ts:/usr/deno/types.ts:ro
     command: /bin/ash -c "npm i && npm run dev"
 
   mongo:

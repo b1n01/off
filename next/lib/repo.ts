@@ -1,4 +1,5 @@
 import type { TokenFetcher } from "types/main";
+import type { User } from "@backend/types";
 
 export function useRepo(
   { fetcher, url }: { fetcher: TokenFetcher; url: string },
@@ -34,7 +35,7 @@ export function useRepo(
   return {
     /** Gets the logged user */
     getUser: function () {
-      return send({ endpoint: url });
+      return send({ endpoint: url }) as Promise<User>;
     },
 
     /** Adds an adapter to the logged user */
@@ -47,7 +48,7 @@ export function useRepo(
           method: "POST",
           body: JSON.stringify(data),
         },
-      });
+      }) as Promise<{ message: string }>;
     },
 
     /** Get data from facebook api test */
@@ -55,7 +56,7 @@ export function useRepo(
       return send({
         endpoint: new URL("facebook-api", url).href,
         options: { method: "POST" },
-      });
+      }) as Promise<{ message: string }>;
     },
 
     /** Get data from github api test */
@@ -63,12 +64,14 @@ export function useRepo(
       return send({
         endpoint: new URL("github-api", url).href,
         options: { method: "POST" },
-      });
+      }) as Promise<{ message: string }>;
     },
 
     /** Get a list of user to follow */
-    getUsersToFollow: function () {
-      return send({ endpoint: new URL("users-to-follow", url).href });
+    getUsersToFollow: async function () {
+      return send({
+        endpoint: new URL("users-to-follow", url).href,
+      }) as Promise<[{ uuid: string; following: boolean }]>;
     },
 
     /** Follow a user */
@@ -76,7 +79,7 @@ export function useRepo(
       return send({
         endpoint: new URL("users-to-follow", url).href,
         options: { method: "POST", body: JSON.stringify({ uuid }) },
-      });
+      }) as Promise<{ message: string }>;
     },
   };
 }
