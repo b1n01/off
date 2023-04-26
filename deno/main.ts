@@ -80,7 +80,7 @@ app.post("/adapter", async (req, res) => {
   const users = db.collection("users");
 
   await users.updateOne(
-    { _id: req.user._id },
+    { uuid: req.user.uuid },
     { $push: { providers: { provider, accessToken } } },
   );
   res.json({ message: "ok" });
@@ -111,7 +111,7 @@ app.post("/facebook-api", async (req, res) => {
 
   const users = db.collection("users");
   await users.updateOne(
-    { _id: req.user._id },
+    { uuid: req.user.uuid },
     { $push: { posts: posts.data } },
   );
 
@@ -141,7 +141,7 @@ app.post("/github-api", async (req, res) => {
 
   const users = db.collection("users");
   await users.updateOne(
-    { _id: req.user._id },
+    { uuid: req.user.uuid },
     { $push: { posts: events } },
   );
 
@@ -166,7 +166,7 @@ app.post("/users-to-follow", async (req, res) => {
   const users = db.collection("users");
 
   await users.updateOne(
-    { _id: req.user._id },
+    { uuid: req.user.uuid },
     { $push: { follows: uuid } },
   );
   res.json({ message: "ok" });
