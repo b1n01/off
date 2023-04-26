@@ -11,6 +11,8 @@ export default function Header() {
       <Link href="/provider/login">providers page</Link>
       {" | "}
       <Link href="/users-to-follow">users to follow page</Link>
+      {" | "}
+      <Link href="/feed">your feed</Link>
     </nav>
   );
 }

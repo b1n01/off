@@ -1,5 +1,5 @@
 import type { TokenFetcher } from "types/main";
-import type { User } from "@backend/types";
+import type { Post, User } from "@backend/types";
 
 export function useRepo(
   { fetcher, url }: { fetcher: TokenFetcher; url: string },
@@ -80,6 +80,10 @@ export function useRepo(
         endpoint: new URL("users-to-follow", url).href,
         options: { method: "POST", body: JSON.stringify({ uuid }) },
       }) as Promise<{ message: string }>;
+    },
+
+    getFeed: function () {
+      return send({ endpoint: new URL("feed", url).href }) as Promise<[Post]>;
     },
   };
 }

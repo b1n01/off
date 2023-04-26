@@ -170,4 +170,14 @@ app.post("/users-to-follow", async (req, res) => {
   res.json({ message: "ok" });
 });
 
+app.get("/feed", async (req, res) => {
+  const followedUsers = await db.collection<User>("users")
+    .find({ uuid: { $in: req.user.follows } })
+    .toArray();
+
+  const posts = followedUsers.map((user) => user.posts);
+
+  res.json(posts);
+});
+
 app.listen(3000);
