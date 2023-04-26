@@ -1,8 +1,10 @@
-import { load } from "https://deno.land/std@0.184.0/dotenv/mod.ts";
-import { Callback, MongoClient } from "npm:mongodb@5.1";
-import express, { Request, Response } from "npm:express@4.18.2";
-import * as jose from "https://deno.land/x/jose@v4.13.1/index.ts";
-import hkdf from "https://deno.land/x/hkdf@v1.0.4/index.ts";
+import { load } from "./deps.ts";
+import { mongoClient } from "./deps.ts";
+import { express, NextFunction, Request, Response } from "./deps.ts";
+import { jwtDecrypt, JWTPayload } from "./deps.ts";
+import { hkdf } from "./deps.ts";
+import type { User } from "./types.d.ts";
+
 const ENV = { ...await load(), ...await load({ envPath: "./.env.local" }) };
 
 const app = express();
@@ -10,32 +12,32 @@ app.use(express.json());
 app.use(firewall);
 app.use(userProvider);
 
-const mongo = new MongoClient(ENV.MONGO_URI);
+const mongo = new mongoClient(ENV.MONGO_URI);
 await mongo.connect();
 const db = mongo.db("off");
 
-async function firewall(req: Request, res: Request, next: Callback) {
+async function firewall(req: Request, res: Response, next: NextFunction) {
   try {
     const token: string | undefined = req.get("Authorization");
     if (!token) throw new Deno.errors.PermissionDenied();
 
     const jwt = token.replace("Bearer ", "");
-    const decoded = await decodeNextAuthJwt(jwt);
+    const decoded = await decodeJwt(jwt);
 
     if (!decoded) throw new Deno.errors.PermissionDenied();
 
-    req.session = decoded.data;
+    req.body.session = decoded.data;
     next();
   } catch (_error) {
     res.status(401).json({ message: "Unauthenticated" });
   }
 }
 
-async function userProvider(req: Request, _res: Request, next: Callback) {
+async function userProvider(req: Request, _res: Response, next: NextFunction) {
   const user = await db.command(
     {
       findAndModify: "users",
-      query: req.session,
+      query: req.body.session,
       update: {
         $setOnInsert: {
           posts: [],
@@ -48,6 +50,7 @@ async function userProvider(req: Request, _res: Request, next: Callback) {
       new: true,
     },
   );
+  req.body.session = undefined;
   req.user = user.value;
   next();
 }
@@ -56,22 +59,24 @@ async function getDerivedKey(secret: string) {
   return await hkdf("sha256", secret, "", "Off Encryption Key", 32);
 }
 
-async function decodeNextAuthJwt(jwt: string) {
-  if (!jwt) return null;
+async function decodeJwt(jwt: string) {
+  if (!jwt) return undefined;
   const key = await getDerivedKey(ENV.APP_SECRET);
-  const { payload } = await jose.jwtDecrypt(jwt, key);
-
-  return payload;
+  const decripted = await jwtDecrypt(jwt, key);
+  return decripted.payload as JWTPayload & {
+    data: Record<string, unknown>;
+  };
 }
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (req, res) => {
   res.json(req.user);
 });
 
-app.post("/adapter", async (req: Request, res: Response) => {
+app.post("/adapter", async (req, res) => {
   const accessToken = req.body.accessToken;
   const provider = req.body.provider;
   const users = db.collection("users");
+
   await users.updateOne(
     { _id: req.user._id },
     { $push: { providers: { provider, accessToken } } },
@@ -79,13 +84,14 @@ app.post("/adapter", async (req: Request, res: Response) => {
   res.json({ message: "ok" });
 });
 
-app.post("/facebook-api", async (req: Request, res: Response) => {
-  const provider = req.user.providers.find((item: { provider: string }) =>
-    item.provider === "facebook"
+app.post("/facebook-api", async (req, res) => {
+  const provider = req.user.providers.find((provider) =>
+    provider.name === "facebook"
   );
 
   if (!provider) {
     res.status(404).json({ message: "Facebook provider not found" });
+    return;
   }
 
   const data = await fetch(
@@ -110,13 +116,14 @@ app.post("/facebook-api", async (req: Request, res: Response) => {
   res.json({ message: "ok" });
 });
 
-app.post("/github-api", async (req: Request, res: Response) => {
-  const provider = req.user.providers.find((item: { provider: string }) =>
-    item.provider === "github"
+app.post("/github-api", async (req, res) => {
+  const provider = req.user.providers.find((provider) =>
+    provider.name === "github"
   );
 
   if (!provider) {
     res.status(404).json({ message: "Github provider not found" });
+    return;
   }
 
   const URL = "https://api.github.com";
@@ -139,11 +146,9 @@ app.post("/github-api", async (req: Request, res: Response) => {
   res.json({ message: "ok" });
 });
 
-app.get("/users-to-follow", async (req: Request, res: Response) => {
-  const users = db.collection("users");
-
-  const usersToFollow = await users.find({ uuid: { $ne: req.user.uuid } })
-    .project({ _id: 0, uuid: 1 })
+app.get("/users-to-follow", async (req, res) => {
+  const usersToFollow = await db.collection<User>("users")
+    .find({ uuid: { $ne: req.user.uuid } })
     .toArray();
 
   const data = usersToFollow.map((user) => ({
@@ -154,7 +159,7 @@ app.get("/users-to-follow", async (req: Request, res: Response) => {
   res.json(data);
 });
 
-app.post("/users-to-follow", async (req: Request, res: Response) => {
+app.post("/users-to-follow", async (req, res) => {
   const uuid = req.body.uuid as string;
   const users = db.collection("users");
 
