@@ -3,7 +3,7 @@ import { mongoClient } from "./deps.ts";
 import { express, NextFunction, Request, Response } from "./deps.ts";
 import { jwtDecrypt, JWTPayload } from "./deps.ts";
 import { hkdf } from "./deps.ts";
-import type { User } from "./types.d.ts";
+import { Post, type User } from "./types.ts";
 
 const ENV = { ...await load(), ...await load({ envPath: "./.env.local" }) };
 
@@ -76,12 +76,11 @@ app.get("/", (req, res) => {
 
 app.post("/adapter", async (req, res) => {
   const accessToken = req.body.accessToken;
-  const provider = req.body.provider;
-  const users = db.collection("users");
+  const name = req.body.provider;
 
-  await users.updateOne(
+  await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { providers: { provider, accessToken } } },
+    { $push: { providers: { name, accessToken } } },
   );
   res.json({ message: "ok" });
 });
@@ -109,8 +108,17 @@ app.post("/facebook-api", async (req, res) => {
 
   const posts = await data.json();
 
-  const users = db.collection("users");
-  await users.updateOne(
+  const validate = Post.array().safeParse(posts.data);
+
+  if (!validate.success) {
+    console.log("Invalid posts", validate.error, posts.data);
+    res.status(500).json({ message: "invalid posts" });
+    return;
+  }
+
+  console.log("Valid posts 🎉");
+
+  await db.collection("users").updateOne(
     { uuid: req.user.uuid },
     { $push: { posts: posts.data } },
   );
