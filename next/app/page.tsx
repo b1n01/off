@@ -4,7 +4,7 @@ import { useRepo } from "lib/server/repo";
 
 export default async function Home() {
   const repo = useRepo();
-  const session = getData();
+  const session = await getData();
   const token = getToken();
 
   try {

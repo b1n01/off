@@ -26,6 +26,7 @@ export function useRepo(
     });
 
     if (!response.ok) {
+      console.error(await response.json());
       throw new Error("Failed to fetch data");
     }
 
@@ -82,6 +83,7 @@ export function useRepo(
       }) as Promise<{ message: string }>;
     },
 
+    /** Get user feed */
     getFeed: function () {
       return send({ endpoint: new URL("feed", url).href }) as Promise<[Post]>;
     },
