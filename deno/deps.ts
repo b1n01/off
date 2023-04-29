@@ -1,4 +1,4 @@
-// @deno-types="npm:@types/express@4.17.17"
+// @deno-types="npm:@types/express"
 export {
   default as express,
   type NextFunction,
