@@ -1,10 +1,16 @@
-import { load } from "./deps.ts";
-import { mongoClient } from "./deps.ts";
-import { express, NextFunction, Request, Response } from "./deps.ts";
-import { jwtDecrypt, JWTPayload } from "./deps.ts";
-import { hkdf } from "./deps.ts";
+import {
+  express,
+  hkdf,
+  jwtDecrypt,
+  type JWTPayload,
+  load,
+  MongoClient,
+  type NextFunction,
+  Octokit,
+  type Request,
+  type Response,
+} from "./deps.ts";
 import type { FacebookPost, GithubPost, GithubUser, User } from "./types.ts";
-import { Octokit } from "./deps.ts";
 
 const ENV = { ...await load(), ...await load({ envPath: "./.env.local" }) };
 
@@ -13,7 +19,7 @@ app.use(express.json());
 app.use(firewall);
 app.use(userProvider);
 
-const mongo = new mongoClient(ENV.MONGO_URI);
+const mongo = new MongoClient(ENV.MONGO_URI);
 await mongo.connect();
 const db = mongo.db("off");
 const users = db.collection("users");
