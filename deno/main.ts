@@ -93,7 +93,7 @@ app.post("/adapter", async (req, res) => {
   res.json({ message: "ok" });
 });
 
-app.post("/facebook-api", async (req, res) => {
+app.post("/fetch-facebook-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "facebook");
 
   if (!provider) {
@@ -114,7 +114,7 @@ app.post("/facebook-api", async (req, res) => {
   const postResponse = await data.json() as { data: FacebookPost[] };
 
   const posts = postResponse.data.map((post) => ({
-    provider: "github",
+    provider: "facebook",
     data: post,
   }));
 
@@ -126,7 +126,7 @@ app.post("/facebook-api", async (req, res) => {
   res.json({ message: "ok" });
 });
 
-app.post("/github-api", async (req, res) => {
+app.post("/fetch-github-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "github");
   if (!provider) {
     return res.status(400).json({ message: "Github provider not found" });
@@ -164,7 +164,7 @@ app.get("/users-to-follow", async (req, res) => {
   res.json(data);
 });
 
-app.post("/users-to-follow", async (req, res) => {
+app.post("/follow", async (req, res) => {
   const uuid = req.body.uuid as string;
   const users = db.collection("users");
 
@@ -182,6 +182,8 @@ app.get("/feed", async (req, res) => {
     .toArray();
 
   const posts = followedUsers.map((user) => user.posts);
+
+  console.log(posts);
 
   res.json(posts);
 });

@@ -6,13 +6,13 @@ export default function Header() {
     <nav>
       <Link href="/">home</Link>
       {" | "}
-      <Link href="/auth/login">login page</Link>
-      {" | "}
-      <Link href="/provider/login">providers page</Link>
-      {" | "}
-      <Link href="/users-to-follow">users to follow page</Link>
-      {" | "}
       <Link href="/feed">your feed</Link>
+      {" | "}
+      <Link href="/users-to-follow">users to follow</Link>
+      {" | "}
+      <Link href="/login">login</Link>
+      {" | "}
+      <Link href="/provider">providers</Link>
     </nav>
   );
 }

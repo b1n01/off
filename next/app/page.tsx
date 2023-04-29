@@ -15,7 +15,7 @@ export default async function Home() {
         <p>Here the session data: {JSON.stringify(session)}</p>
         <hr></hr>
         <div>
-          <p>You follows:</p>
+          <p>You follow:</p>
           <pre><code>{JSON.stringify(user.follows, null, 4)}</code></pre>
         </div>
         <hr></hr>
@@ -28,7 +28,7 @@ export default async function Home() {
   } catch {
     return (
       <main>
-        You are not logged in, go to <Link href="/auth/login">login page</Link>
+        You are not logged in, go to <Link href="/login">login page</Link>
       </main>
     );
   }

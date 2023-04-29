@@ -12,9 +12,9 @@ export default function Login() {
   return (
     <main>
       <p>
-        <Link href="/facebook-api">fetch facebook data</Link>
+        <Link href="/facebook">fetch facebook data</Link>
         {" | "}
-        <Link href="/github-api">fetch github data</Link>
+        <Link href="/github">fetch github data</Link>
       </p>
       <p>Here you enable providers:</p>
       <div>

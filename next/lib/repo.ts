@@ -26,7 +26,7 @@ export function useRepo(
     });
 
     if (!response.ok) {
-      console.error(await response.json());
+      console.error("Failed to fetch data", await response.json());
       throw new Error("Failed to fetch data");
     }
 
@@ -55,7 +55,7 @@ export function useRepo(
     /** Get data from facebook api test */
     getFacebookApi: function () {
       return send({
-        endpoint: new URL("facebook-api", url).href,
+        endpoint: new URL("fetch-facebook-posts", url).href,
         options: { method: "POST" },
       }) as Promise<{ message: string }>;
     },
@@ -63,7 +63,7 @@ export function useRepo(
     /** Get data from github api test */
     getGithubApi: function () {
       return send({
-        endpoint: new URL("github-api", url).href,
+        endpoint: new URL("fetch-github-posts", url).href,
         options: { method: "POST" },
       }) as Promise<{ message: string }>;
     },
@@ -78,7 +78,7 @@ export function useRepo(
     /** Follow a user */
     followUser: function ({ uuid }: { uuid: string }) {
       return send({
-        endpoint: new URL("users-to-follow", url).href,
+        endpoint: new URL("follow", url).href,
         options: { method: "POST", body: JSON.stringify({ uuid }) },
       }) as Promise<{ message: string }>;
     },
