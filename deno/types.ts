@@ -34,3 +34,4 @@ export type GithubUser = Endpoints["GET /user"]["response"]["data"];
 
 export type User = z.infer<typeof User>;
 export type FacebookPost = z.infer<typeof FacebookPost>;
+export type Post = FacebookPost | GithubPost;
