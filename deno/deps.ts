@@ -13,3 +13,5 @@ export {
   type Response,
 } from "npm:express@4.18.2";
 export { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
+export { Octokit } from "npm:octokit";
+export { type Endpoints } from "npm:@octokit/types";

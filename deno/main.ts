@@ -3,7 +3,8 @@ import { mongoClient } from "./deps.ts";
 import { express, NextFunction, Request, Response } from "./deps.ts";
 import { jwtDecrypt, JWTPayload } from "./deps.ts";
 import { hkdf } from "./deps.ts";
-import { Post, type User } from "./types.ts";
+import type { FacebookPost, GithubPost, GithubUser, User } from "./types.ts";
+import { Octokit } from "./deps.ts";
 
 const ENV = { ...await load(), ...await load({ envPath: "./.env.local" }) };
 
@@ -39,7 +40,7 @@ async function userProvider(req: Request, _res: Response, next: NextFunction) {
   const user = await db.command(
     {
       findAndModify: "users",
-      query: req.body.session,
+      query: { auth: req.body.session },
       update: {
         $setOnInsert: {
           posts: [],
@@ -82,17 +83,15 @@ app.post("/adapter", async (req, res) => {
     { uuid: req.user.uuid },
     { $push: { providers: { name, accessToken } } },
   );
+
   res.json({ message: "ok" });
 });
 
 app.post("/facebook-api", async (req, res) => {
-  const provider = req.user.providers.find((provider) =>
-    provider.name === "facebook"
-  );
+  const provider = req.user.providers.find(({ name }) => name === "facebook");
 
   if (!provider) {
-    res.status(404).json({ message: "Facebook provider not found" });
-    return;
+    return res.status(400).json({ message: "Facebook provider not found" });
   }
 
   const data = await fetch(
@@ -106,51 +105,41 @@ app.post("/facebook-api", async (req, res) => {
     &access_token=${provider.accessToken}`,
   );
 
-  const posts = await data.json();
+  const postResponse = await data.json() as { data: FacebookPost[] };
 
-  const validate = Post.array().safeParse(posts.data);
-
-  if (!validate.success) {
-    console.log("Invalid posts", validate.error, posts.data);
-    res.status(500).json({ message: "invalid posts" });
-    return;
-  }
-
-  console.log("Valid posts 🎉");
+  const posts = postResponse.data.map((post) => ({
+    provider: "github",
+    data: post,
+  }));
 
   await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { posts: posts.data } },
+    { $push: { posts } },
   );
 
   res.json({ message: "ok" });
 });
 
 app.post("/github-api", async (req, res) => {
-  const provider = req.user.providers.find((provider) =>
-    provider.name === "github"
-  );
-
+  const provider = req.user.providers.find(({ name }) => name === "github");
   if (!provider) {
-    res.status(404).json({ message: "Github provider not found" });
-    return;
+    return res.status(400).json({ message: "Github provider not found" });
   }
 
-  const URL = "https://api.github.com";
-  const options = {
-    headers: { "Authorization": `Bearer ${provider.accessToken}` },
-  };
+  const octokit = new Octokit({ auth: provider.accessToken });
+  const userRes = await octokit.request("GET /user") as { data: GithubUser };
+  const eventsRes = await octokit.request("GET /users/{username}/events", {
+    username: userRes.data.login,
+  }) as { data: GithubPost[] };
 
-  const userReq = await fetch(`${URL}/user`, options);
-  const user = await userReq.json();
+  const posts = eventsRes.data.map((event) => ({
+    provider: "github",
+    data: event,
+  }));
 
-  const eventsReq = await fetch(`${URL}/users/${user.login}/events`, options);
-  const events = await eventsReq.json();
-
-  const users = db.collection("users");
-  await users.updateOne(
+  await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { posts: events } },
+    { $push: { posts } },
   );
 
   res.json({ message: "ok" });
@@ -177,6 +166,7 @@ app.post("/users-to-follow", async (req, res) => {
     { uuid: req.user.uuid },
     { $push: { follows: uuid } },
   );
+
   res.json({ message: "ok" });
 });
 
