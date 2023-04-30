@@ -1,12 +1,13 @@
-# TODO
+# Prototype
 
 ## Fetaures
  
-- [ ] RSS adapter
+- [ ] RSS provider 
 - [ ] Facebook webhooks
+- [ ] Github webhooks
 
-## FIX
+## Fixes
 
-- [ ] Google adapter shouldn't exist
-- [ ] Can we rename "adapters" into something else?
-- [X] Use async/await only where needed
+- [x] Google adapter shouldn't exist
+- [x] Can we rename "adapters" into something else?
+- [x] Use async/await only where needed

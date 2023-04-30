@@ -13,9 +13,9 @@ export default async function Home() {
     );
   } catch {
     return (
-      <main>
+      <p>
         You are not logged in, go to <Link href="/login">login page</Link>
-      </main>
+      </p>
     );
   }
 }

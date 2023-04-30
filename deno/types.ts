@@ -11,6 +11,11 @@ export const FacebookPost = z.object({
 
 const providers = z.enum(["facebook", "github", "google"]);
 
+export const Post = z.object({
+  provider: providers,
+  data: z.unknown(),
+});
+
 export const User = z.object({
   uuid: z.string().uuid(),
   auth: z.object({
@@ -18,10 +23,7 @@ export const User = z.object({
     provider: providers,
   }),
   follows: z.array(z.string()),
-  posts: z.array(z.object({
-    provider: providers,
-    data: z.unknown(),
-  })),
+  posts: z.array(Post),
   providers: z.array(z.object({
     name: providers,
     accessToken: z.string(),
@@ -34,4 +36,4 @@ export type GithubUser = Endpoints["GET /user"]["response"]["data"];
 
 export type User = z.infer<typeof User>;
 export type FacebookPost = z.infer<typeof FacebookPost>;
-export type Post = FacebookPost | GithubPost;
+export type Post = z.infer<typeof Post>;

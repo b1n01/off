@@ -21,7 +21,7 @@ const GOOGLE_CREDENTIALS = {
 };
 
 const authPassport = new passport.Passport();
-const providerPassport = new passport.Passport();
+const dataPassport = new passport.Passport();
 
 authPassport.use(
   new FacebookStrategy({
@@ -46,24 +46,17 @@ authPassport.use(
   }),
 );
 
-providerPassport.use(
+dataPassport.use(
   new FacebookStrategy({
     ...FACEBOOK_CREDENTIALS,
-    callbackURL: "/api/facebook/adapter/callback",
+    callbackURL: "/api/facebook/data/callback",
   }, function (accessToken, _refreshToken, _profile, callback) {
     return callback(null, { accessToken });
   }),
 ).use(
   new GitHubStrategy({
     ...GITHUB_CREDENTIALS,
-    callbackURL: "/api/github/adapter/callback",
-  }, function (accessToken, _refreshToken, _profile, callback) {
-    return callback(null, { accessToken });
-  }),
-).use(
-  new GoogleStrategy({
-    ...GOOGLE_CREDENTIALS,
-    callbackURL: "/api/google/adapter/callback",
+    callbackURL: "/api/github/data/callback",
   }, function (accessToken, _refreshToken, _profile, callback) {
     return callback(null, { accessToken });
   }),
@@ -74,50 +67,53 @@ function getPassport(scope: string) {
   switch (scope) {
     case "auth":
       return authPassport;
-    case "adapter":
-      return providerPassport;
+    case "data":
+      return dataPassport;
     default:
-      throw new Error("Invalid callback scope:" + scope);
+      throw new Error("Invalid callback scope: " + scope);
   }
 }
 
 /** Parses and validates query params. Returns null if params are invalid */
 function parseQuery(request: NextApiRequest) {
-  const { scope, provider } = request.query as {
-    scope: string;
-    provider: string;
-  };
-
-  const scopes = ["auth", "adapter"];
+  const { scope, provider } = request.query;
+  const scopes = ["auth", "data"];
   const providers = ["facebook", "github", "google"];
-  if (scopes.includes(scope) && providers.includes(provider)) {
-    return { scope, provider };
+
+  if (typeof scope !== "string" || typeof provider !== "string") {
+    return null;
   }
 
-  return null;
+  if (!scopes.includes(scope) || !providers.includes(provider)) {
+    return null;
+  }
+
+  if (scope === "data" && provider === "google") {
+    // Google is not a data provider
+    return null;
+  }
+
+  return { scope, provider };
 }
 
 /** Middleware that inits the passport auth flow */
 export function authenticate(
-  req: NextApiRequest,
-  res: NextApiResponse,
+  request: NextApiRequest,
+  response: NextApiResponse,
   next: NextHandler,
 ) {
-  const params = parseQuery(req);
+  const params = parseQuery(request);
   if (params) {
     const passport = getPassport(params.scope);
-    let options = { session: false } as {
-      session: boolean;
-      scope?: Array<string>;
-    };
+    let options = { session: false, scope: [""] };
 
     if (params.provider === "google") {
       options.scope = ["profile"];
     }
 
-    passport.authenticate(params.provider, options)(req, res, next);
+    passport.authenticate(params.provider, options)(request, response, next);
   } else {
-    res.redirect("/404");
+    response.redirect("/404");
   }
 }
 
@@ -128,7 +124,6 @@ export async function authenticated(
   next: NextHandler,
 ) {
   const params = parseQuery(request);
-
   if (params) {
     const { scope, provider } = params;
 

@@ -120,7 +120,7 @@ app.post("/fetch-facebook-posts", async (req, res) => {
 
   await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { posts } },
+    { $push: { posts: { $each: posts } } },
   );
 
   res.json({ message: "ok" });
@@ -145,7 +145,7 @@ app.post("/fetch-github-posts", async (req, res) => {
 
   await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { posts } },
+    { $push: { posts: { $each: posts } } },
   );
 
   res.json({ message: "ok" });
@@ -181,9 +181,7 @@ app.get("/feed", async (req, res) => {
     .find({ uuid: { $in: req.user.follows } })
     .toArray();
 
-  const posts = followedUsers.map((user) => user.posts);
-
-  console.log(posts);
+  const posts = followedUsers.map((user) => user.posts).flat();
 
   res.json(posts);
 });
