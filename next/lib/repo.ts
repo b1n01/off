@@ -27,8 +27,11 @@ export function useRepo(
 
     if (!response.ok) {
       const body = await response.json();
-      console.error("Repo:", body);
-      throw new Error("Failed to fetch data", { cause: body });
+      throw {
+        type: "FetchException",
+        status: response.status,
+        message: body.message,
+      };
     }
 
     return response.json();
