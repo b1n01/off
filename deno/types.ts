@@ -13,6 +13,8 @@ const providers = z.enum(["facebook", "github", "google"]);
 
 export const Post = z.object({
   provider: providers,
+  id: z.string(),
+  type: z.string(),
   data: z.unknown(),
 });
 
@@ -27,6 +29,7 @@ export const User = z.object({
   providers: z.array(z.object({
     name: providers,
     accessToken: z.string(),
+    lastFetch: z.string().datetime().nullable(),
   })),
 });
 

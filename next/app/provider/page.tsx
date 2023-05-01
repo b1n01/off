@@ -16,13 +16,10 @@ export default function Login() {
         const repo = useRepo();
         const user = await repo.getUser();
         setUser(user);
-      } catch {
-        setUser(undefined);
       } finally {
         setLoading(false);
       }
     };
-
     fetchUser();
   }, []);
 
@@ -32,14 +29,14 @@ export default function Login() {
 
   const fetchGithubData = async () => {
     const repo = useRepo();
-    const data = await repo.getGithubApi();
+    const data = await repo.fetchGithubData();
     setData(data);
     router.refresh();
   };
 
   const fetchFacebookData = async () => {
     const repo = useRepo();
-    const data = await repo.getFacebookApi();
+    const data = await repo.fetchFacebookData();
     setData(data);
     router.refresh();
   };
@@ -63,7 +60,7 @@ export default function Login() {
         <div>
           <button onClick={fetchFacebookData}>Facebook</button>
         </div>
-        <p>{data ? "Ok, data fetched" : ""}</p>
+        <p>{JSON.stringify(data)}</p>
       </main>
     );
   } else {

@@ -10,28 +10,24 @@ async function handle({ request }: { request: NextRequest }) {
     return NextResponse.json({ message: "Not found" }, { status: 404 });
   }
 
+  const body = request.bodyUsed ? await request.json() : null;
+
   try {
-    const body = await request.json();
-    var data = await repo[method](body);
-  } catch {
-    var data = await repo[method]();
+    let data;
+    if (body) {
+      data = await repo[method](body);
+    } else {
+      data = await repo[method]();
+    }
+    return NextResponse.json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error("Repo proxy:", e.cause);
+      return NextResponse.json(e.cause, { status: 400 });
+    } else throw e;
   }
-
-  return NextResponse.json(data);
-}
-
-export function GET(request: NextRequest) {
-  return handle({ request });
 }
 
 export function POST(request: NextRequest) {
-  return handle({ request });
-}
-
-export function PUT(request: NextRequest) {
-  return handle({ request });
-}
-
-export function DELETE(request: NextRequest) {
   return handle({ request });
 }

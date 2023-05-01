@@ -87,7 +87,7 @@ app.post("/adapter", async (req, res) => {
 
   await db.collection("users").updateOne(
     { uuid: req.user.uuid },
-    { $push: { providers: { name, accessToken } } },
+    { $push: { providers: { name, accessToken, lastFetch: null } } },
   );
 
   res.json({ message: "ok" });
@@ -132,20 +132,40 @@ app.post("/fetch-github-posts", async (req, res) => {
     return res.status(400).json({ message: "Github provider not found" });
   }
 
+  const oneHourAgo = Date.now() - (3600 * 1000);
+  if (
+    provider.lastFetch &&
+    new Date(provider.lastFetch).getTime() > oneHourAgo
+  ) {
+    return res.status(400).json({ message: "Github posts already up to date" });
+  }
+
   const octokit = new Octokit({ auth: provider.accessToken });
   const userRes = await octokit.request("GET /user") as { data: GithubUser };
   const eventsRes = await octokit.request("GET /users/{username}/events", {
     username: userRes.data.login,
   }) as { data: GithubPost[] };
 
-  const posts = eventsRes.data.map((event) => ({
+  const newPosts = eventsRes.data.map((event) => ({
     provider: "github",
+    type: "event",
+    id: `github-event-${event.id}`,
     data: event,
   }));
 
+  const postMap = new Map();
+  for (const post of [...req.user.posts, ...newPosts]) {
+    postMap.set(post.id, post);
+  }
+
+  const posts = [...postMap.values()];
+
   await db.collection("users").updateOne(
-    { uuid: req.user.uuid },
-    { $push: { posts: { $each: posts } } },
+    { uuid: req.user.uuid, "providers.name": "github" },
+    {
+      $set: { posts },
+      $currentDate: { "providers.$.lastFetch": true },
+    },
   );
 
   res.json({ message: "ok" });
