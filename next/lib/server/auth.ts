@@ -128,7 +128,7 @@ export async function authenticated(
     const { scope, provider } = params;
 
     /**
-     * If scope is auth set user data in session, otherwise send the adapter's
+     * If scope is auth set user data in session, otherwise send the provider's
      * access token to the API
      */
     if (scope === "auth") {
@@ -137,7 +137,7 @@ export async function authenticated(
     } else {
       const accessToken = request.user.accessToken;
       const repo = useRepoFromPages({ request });
-      await repo.sendAdapter({ accessToken, provider });
+      await repo.sendProvider({ accessToken, provider });
     }
 
     response.redirect("/");

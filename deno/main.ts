@@ -81,7 +81,7 @@ app.get("/", (req, res) => {
   res.json(req.user);
 });
 
-app.post("/adapter", async (req, res) => {
+app.post("/provider", async (req, res) => {
   const accessToken = req.body.accessToken;
   const name = req.body.provider;
 

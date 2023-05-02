@@ -43,12 +43,12 @@ export function useRepo(
       return send({ endpoint: url }) as Promise<User>;
     },
 
-    /** Adds an adapter to the logged user */
-    sendAdapter: function (
+    /** Adds an provider to the logged user */
+    sendProvider: function (
       data: { accessToken: string; provider: string },
     ) {
       return send({
-        endpoint: new URL("adapter", url).href,
+        endpoint: new URL("provider", url).href,
         options: {
           method: "POST",
           body: JSON.stringify(data),
