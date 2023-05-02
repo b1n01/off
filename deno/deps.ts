@@ -5,7 +5,7 @@ export {
   type Request,
   type Response,
 } from "npm:express@4.18.2";
-export { MongoClient } from "npm:mongodb@5.1";
+export { type Db, MongoClient } from "npm:mongodb@5.1";
 export { load } from "https://deno.land/std@0.184.0/dotenv/mod.ts";
 export {
   jwtDecrypt,

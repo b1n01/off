@@ -1,5 +1,14 @@
 import { Endpoints, z } from "./deps.ts";
 
+const providers = z.enum(["facebook", "github", "google"]);
+
+export const Post = z.object({
+  provider: providers,
+  id: z.string(),
+  type: z.string(),
+  data: z.unknown(),
+});
+
 export const FacebookPost = z.object({
   id: z.string(),
   message: z.string().optional(),
@@ -9,13 +18,10 @@ export const FacebookPost = z.object({
   permalink_url: z.string().url(),
 });
 
-const providers = z.enum(["facebook", "github", "google"]);
-
-export const Post = z.object({
-  provider: providers,
-  id: z.string(),
-  type: z.string(),
-  data: z.unknown(),
+export const Provider = z.object({
+  name: providers,
+  accessToken: z.string(),
+  lastFetch: z.string().datetime().nullable(),
 });
 
 export const User = z.object({
@@ -26,11 +32,7 @@ export const User = z.object({
   }),
   follows: z.array(z.string()),
   posts: z.array(Post),
-  providers: z.array(z.object({
-    name: providers,
-    accessToken: z.string(),
-    lastFetch: z.string().datetime().nullable(),
-  })),
+  providers: z.array(Provider),
 });
 
 export type GithubPost =
@@ -40,3 +42,6 @@ export type GithubUser = Endpoints["GET /user"]["response"]["data"];
 export type User = z.infer<typeof User>;
 export type FacebookPost = z.infer<typeof FacebookPost>;
 export type Post = z.infer<typeof Post>;
+export type Provider = z.infer<typeof Provider>;
+
+export type Provide = (provider: Provider) => Promise<Post[]>;

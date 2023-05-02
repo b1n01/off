@@ -1,4 +1,5 @@
 import {
+  type Db,
   express,
   hkdf,
   jwtDecrypt,
@@ -10,7 +11,15 @@ import {
   type Request,
   type Response,
 } from "./deps.ts";
-import type { FacebookPost, GithubPost, GithubUser, User } from "./types.ts";
+import type {
+  FacebookPost,
+  GithubPost,
+  GithubUser,
+  Post,
+  Provide,
+  Provider,
+  User,
+} from "./types.ts";
 
 const ENV = { ...await load(), ...await load({ envPath: "./.env.local" }) };
 
@@ -24,6 +33,67 @@ await mongo.connect();
 const db = mongo.db("off");
 const users = db.collection("users");
 users.createIndex({ uuid: 1 });
+
+const fetchGithubPosts: Provide = async ({ accessToken }: Provider) => {
+  const octokit = new Octokit({ auth: accessToken });
+  const userRes = await octokit.request("GET /user") as { data: GithubUser };
+  const eventsRes = await octokit.request("GET /users/{username}/events", {
+    username: userRes.data.login,
+  }) as { data: GithubPost[] };
+
+  return eventsRes.data.map((event) => ({
+    provider: "github" as const,
+    type: "event",
+    id: `github-event-${event.id}`,
+    data: event as unknown,
+  }));
+};
+
+const fetchFacebookPosts: Provide = async ({ accessToken }: Provider) => {
+  const data = await fetch(
+    `https://graph.facebook.com/me/posts?fields=
+    id,
+    message,
+    created_time,
+    type,
+    full_picture,
+    permalink_url
+    &access_token=${accessToken}`,
+  );
+
+  const postRes = await data.json() as { data: FacebookPost[] };
+
+  return postRes.data.map((post) => ({
+    provider: "facebook" as const,
+    type: "post",
+    id: `facebook-event-${post.id}`,
+    data: post as unknown,
+  }));
+};
+
+function mergePosts(oldPosts: Post[], newPosts: Post[]): Post[] {
+  const postMap = new Map();
+  for (const post of [...oldPosts, ...newPosts]) {
+    postMap.set(post.id, post);
+  }
+
+  return [...postMap.values()];
+}
+
+function isUptodate(date: string) {
+  const oneHourAgo = Date.now() - (3600 * 1000);
+  return new Date(date).getTime() > oneHourAgo;
+}
+
+async function setPosts(db: Db, user: User, provider: Provider, posts: Post[]) {
+  return await db.collection("users").updateOne(
+    { uuid: user.uuid, "providers.name": provider.name },
+    {
+      $set: { posts },
+      $currentDate: { "providers.$.lastFetch": true },
+    },
+  );
+}
 
 async function firewall(req: Request, res: Response, next: NextFunction) {
   try {
@@ -100,73 +170,33 @@ app.post("/fetch-facebook-posts", async (req, res) => {
     return res.status(400).json({ message: "Facebook provider not found" });
   }
 
-  const data = await fetch(
-    `https://graph.facebook.com/me/posts?fields=
-    id,
-    message,
-    created_time,
-    type,
-    full_picture,
-    permalink_url
-    &access_token=${provider.accessToken}`,
-  );
+  if (provider.lastFetch && isUptodate(provider.lastFetch)) {
+    return res.status(400).json({
+      message: "Facebook posts already up to date",
+    });
+  }
 
-  const postResponse = await data.json() as { data: FacebookPost[] };
-
-  const posts = postResponse.data.map((post) => ({
-    provider: "facebook",
-    data: post,
-  }));
-
-  await db.collection("users").updateOne(
-    { uuid: req.user.uuid },
-    { $push: { posts: { $each: posts } } },
-  );
+  const newPosts = await fetchFacebookPosts(provider);
+  const posts = mergePosts(req.user.posts, newPosts);
+  await setPosts(db, req.user, provider, posts);
 
   res.json({ message: "ok" });
 });
 
 app.post("/fetch-github-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "github");
+
   if (!provider) {
     return res.status(400).json({ message: "Github provider not found" });
   }
 
-  const oneHourAgo = Date.now() - (3600 * 1000);
-  if (
-    provider.lastFetch &&
-    new Date(provider.lastFetch).getTime() > oneHourAgo
-  ) {
+  if (provider.lastFetch && isUptodate(provider.lastFetch)) {
     return res.status(400).json({ message: "Github posts already up to date" });
   }
 
-  const octokit = new Octokit({ auth: provider.accessToken });
-  const userRes = await octokit.request("GET /user") as { data: GithubUser };
-  const eventsRes = await octokit.request("GET /users/{username}/events", {
-    username: userRes.data.login,
-  }) as { data: GithubPost[] };
-
-  const newPosts = eventsRes.data.map((event) => ({
-    provider: "github",
-    type: "event",
-    id: `github-event-${event.id}`,
-    data: event,
-  }));
-
-  const postMap = new Map();
-  for (const post of [...req.user.posts, ...newPosts]) {
-    postMap.set(post.id, post);
-  }
-
-  const posts = [...postMap.values()];
-
-  await db.collection("users").updateOne(
-    { uuid: req.user.uuid, "providers.name": "github" },
-    {
-      $set: { posts },
-      $currentDate: { "providers.$.lastFetch": true },
-    },
-  );
+  const newPosts = await fetchGithubPosts(provider);
+  const posts = mergePosts(req.user.posts, newPosts);
+  await setPosts(db, req.user, provider, posts);
 
   res.json({ message: "ok" });
 });
