@@ -12,7 +12,11 @@ async function handle({ request }: { request: NextRequest }) {
   }
 
   try {
-    const body = request.bodyUsed ? await request.json() : null;
+    try {
+      var body = await request.json();
+    } catch {
+      var body = null;
+    }
     const data = body ? await repo[method](body) : await repo[method]();
     return NextResponse.json(data);
   } catch (e) {

@@ -6,9 +6,11 @@ import { useRepo } from "lib/client/repo";
 
 export default function Login() {
   const router = useRouter();
-  const [data, setData] = useState<Object | undefined>(undefined);
+  const [providerRes, setProviderRes] = useState<Object | undefined>(undefined);
   const [user, setUser] = useState<Object | undefined>(undefined);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [rss, setRss] = useState<string>("https://ilpost.it/feed");
+  const [rssRes, serRssRes] = useState<Object | undefined>(undefined);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -23,21 +25,28 @@ export default function Login() {
     fetchUser();
   }, []);
 
-  function login(provider: string) {
+  function enabledProvider(provider: string) {
     router.push(`/api/${provider}/data`);
   }
 
   const fetchGithubData = async () => {
     const repo = useRepo();
     const data = await repo.fetchGithubData();
-    setData(data);
+    setProviderRes(providerRes);
     router.refresh();
   };
 
   const fetchFacebookData = async () => {
     const repo = useRepo();
     const data = await repo.fetchFacebookData();
-    setData(data);
+    setProviderRes(providerRes);
+    router.refresh();
+  };
+
+  const enableRss = async () => {
+    const repo = useRepo();
+    const data = await repo.sendRss({ url: rss });
+    serRssRes(data);
     router.refresh();
   };
 
@@ -46,21 +55,29 @@ export default function Login() {
   } else if (user) {
     return (
       <main>
-        <p>Here you enable providers:</p>
+        <p>Here you can enable providers:</p>
         <div>
-          <button onClick={() => login("github")}>Github</button>
+          <button onClick={() => enabledProvider("github")}>Github</button>
         </div>
         <div>
-          <button onClick={() => login("facebook")}>Facebook</button>
+          <button onClick={() => enabledProvider("facebook")}>Facebook</button>
         </div>
-        <p>Here you fetch can data from providers:</p>
+        <hr></hr>
+        <p>Here you can fetch data from providers:</p>
         <div>
           <button onClick={fetchGithubData}>Github</button>
         </div>
         <div>
           <button onClick={fetchFacebookData}>Facebook</button>
         </div>
-        <p>{JSON.stringify(data)}</p>
+        <p>{JSON.stringify(providerRes)}</p>
+        <hr></hr>
+        <p>Here you can add RSS:</p>
+        <input value={rss} onChange={(e) => setRss(e.target.value)}></input>
+        <div>
+          <button onClick={enableRss}>Send RSS</button>
+        </div>
+        <pre><code>{JSON.stringify(rssRes, null, 4)}</code></pre>
       </main>
     );
   } else {

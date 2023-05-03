@@ -1,6 +1,7 @@
 import {
   type Db,
   express,
+  extract,
   hkdf,
   jwtDecrypt,
   type JWTPayload,
@@ -234,6 +235,16 @@ app.get("/feed", async (req, res) => {
   const posts = followedUsers.map((user) => user.posts).flat();
 
   res.json(posts);
+});
+
+app.post("/rss", async (req, res) => {
+  const url = req.body.url as string;
+  try {
+    const result = await extract(url);
+    res.json({ message: "ok", content: result });
+  } catch {
+    res.status(400).json({ message: "RSS feed not found or invalid" });
+  }
 });
 
 app.listen(3000);

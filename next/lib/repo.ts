@@ -91,5 +91,13 @@ export function useRepo(
     getFeed: function () {
       return send({ endpoint: new URL("feed", url).href }) as Promise<[Post]>;
     },
+
+    /** Add a RSS feed */
+    sendRss: function ({ url: rss }: { url: string }) {
+      return send({
+        endpoint: new URL("rss", url).href,
+        options: { method: "POST", body: JSON.stringify({ url: rss }) },
+      }) as Promise<{ message: string }>;
+    },
   };
 }
