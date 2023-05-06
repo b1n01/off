@@ -137,7 +137,7 @@ export async function authenticated(
     } else {
       const accessToken = request.user.accessToken;
       const repo = useRepoFromPages({ request });
-      await repo.sendProvider({ accessToken, provider });
+      await repo.sendOAuthProvider({ accessToken, provider });
     }
 
     response.redirect("/");

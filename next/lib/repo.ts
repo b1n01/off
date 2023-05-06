@@ -43,16 +43,24 @@ export function useRepo(
       return send({ endpoint: url }) as Promise<User>;
     },
 
-    /** Adds an provider to the logged user */
-    sendProvider: function (
+    /** Adds an oauth provider to the logged user */
+    sendOAuthProvider: function (
       data: { accessToken: string; provider: string },
     ) {
       return send({
-        endpoint: new URL("provider", url).href,
+        endpoint: new URL("provider/oauth", url).href,
         options: {
           method: "POST",
           body: JSON.stringify(data),
         },
+      }) as Promise<{ message: string }>;
+    },
+
+    /** Adds a RSS provider to the logged user */
+    sendRSSProvider: function ({ url: rss }: { url: string }) {
+      return send({
+        endpoint: new URL("provider/rss", url).href,
+        options: { method: "POST", body: JSON.stringify({ url: rss }) },
       }) as Promise<{ message: string }>;
     },
 
@@ -68,6 +76,13 @@ export function useRepo(
     fetchGithubData: function () {
       return send({
         endpoint: new URL("fetch-github-posts", url).href,
+        options: { method: "POST" },
+      }) as Promise<{ message: string }>;
+    },
+
+    fetchRSSData: function () {
+      return send({
+        endpoint: new URL("fetch-rss-posts", url).href,
         options: { method: "POST" },
       }) as Promise<{ message: string }>;
     },
@@ -90,14 +105,6 @@ export function useRepo(
     /** Get user feed */
     getFeed: function () {
       return send({ endpoint: new URL("feed", url).href }) as Promise<[Post]>;
-    },
-
-    /** Add a RSS feed */
-    sendRss: function ({ url: rss }: { url: string }) {
-      return send({
-        endpoint: new URL("rss", url).href,
-        options: { method: "POST", body: JSON.stringify({ url: rss }) },
-      }) as Promise<{ message: string }>;
     },
   };
 }

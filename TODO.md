@@ -2,7 +2,7 @@
 
 ## Fetaures
  
-- [ ] RSS provider 
+- [x] RSS provider 
 - [ ] Facebook webhooks
 - [ ] Github webhooks
 
@@ -13,3 +13,5 @@
 - [x] Use async/await only where needed
 - [x] Repo proxy should handle errors
 - [x] Interface for providers
+- [ ] Save user name on sign-up
+- [ ] Save posts date to sort them

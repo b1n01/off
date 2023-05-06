@@ -12,13 +12,15 @@ import {
   type Request,
   type Response,
 } from "./deps.ts";
-import type {
+import {
   FacebookPost,
   GithubPost,
   GithubUser,
+  OAuthProvider,
   Post,
-  Provide,
   Provider,
+  RSSPost,
+  RSSProvider,
   User,
 } from "./types.ts";
 
@@ -35,7 +37,7 @@ const db = mongo.db("off");
 const users = db.collection("users");
 users.createIndex({ uuid: 1 });
 
-const fetchGithubPosts: Provide = async ({ accessToken }: Provider) => {
+const fetchGithubPosts = async ({ accessToken }: OAuthProvider) => {
   const octokit = new Octokit({ auth: accessToken });
   const userRes = await octokit.request("GET /user") as { data: GithubUser };
   const eventsRes = await octokit.request("GET /users/{username}/events", {
@@ -50,7 +52,7 @@ const fetchGithubPosts: Provide = async ({ accessToken }: Provider) => {
   }));
 };
 
-const fetchFacebookPosts: Provide = async ({ accessToken }: Provider) => {
+const fetchFacebookPosts = async ({ accessToken }: OAuthProvider) => {
   const data = await fetch(
     `https://graph.facebook.com/me/posts?fields=
     id,
@@ -69,6 +71,16 @@ const fetchFacebookPosts: Provide = async ({ accessToken }: Provider) => {
     type: "post",
     id: `facebook-event-${post.id}`,
     data: post as unknown,
+  }));
+};
+
+const fetchRssPosts = async ({ url, name }: RSSProvider) => {
+  const postRes = await extract(url) as { entries: RSSPost[] };
+  return postRes.entries.map((post) => ({
+    provider: name,
+    type: "rss",
+    id: `${url}-${post.id}`,
+    data: post,
   }));
 };
 
@@ -91,6 +103,21 @@ async function setPosts(db: Db, user: User, provider: Provider, posts: Post[]) {
     { uuid: user.uuid, "providers.name": provider.name },
     {
       $set: { posts },
+      $currentDate: { "providers.$.lastFetch": true },
+    },
+  );
+}
+
+async function setWebFeed(
+  db: Db,
+  user: User,
+  provider: Provider,
+  posts: Post[],
+) {
+  return await db.collection("users").updateOne(
+    { uuid: user.uuid, "providers.name": provider.name },
+    {
+      $set: { syndication: posts },
       $currentDate: { "providers.$.lastFetch": true },
     },
   );
@@ -121,6 +148,7 @@ async function userProvider(req: Request, _res: Response, next: NextFunction) {
       update: {
         $setOnInsert: {
           posts: [],
+          syndication: [],
           follows: [],
           providers: [],
           uuid: crypto.randomUUID(),
@@ -152,14 +180,52 @@ app.get("/", (req, res) => {
   res.json(req.user);
 });
 
-app.post("/provider", async (req, res) => {
+app.post("/provider/oauth", async (req, res) => {
   const accessToken = req.body.accessToken;
   const name = req.body.provider;
+  const lastFetch = null;
+  const type = "oauth";
+  const provider = { name, accessToken, lastFetch, type };
 
-  await db.collection("users").updateOne(
-    { uuid: req.user.uuid },
-    { $push: { providers: { name, accessToken, lastFetch: null } } },
+  const result = await db.collection("users").updateOne(
+    { uuid: req.user.uuid, "providers.name": name },
+    { $set: { "providers.$": provider } },
   );
+
+  if (!result.modifiedCount) {
+    await db.collection("users").updateOne(
+      { uuid: req.user.uuid },
+      { $push: { providers: provider } },
+    );
+  }
+
+  res.json({ message: "ok" });
+});
+
+app.post("/provider/rss", async (req, res) => {
+  const url = req.body.url as string;
+
+  try {
+    const data = await extract(url);
+    const name = data.title;
+    const lastFetch = null;
+    const type = "rss";
+    const provider = { name, url, lastFetch, type };
+
+    const result = await db.collection("users").updateOne(
+      { uuid: req.user.uuid, "providers.name": name },
+      { $set: { "providers.$": provider } },
+    );
+
+    if (!result.modifiedCount) {
+      await db.collection("users").updateOne(
+        { uuid: req.user.uuid },
+        { $push: { providers: provider } },
+      );
+    }
+  } catch {
+    res.status(400).json({ message: "RSS feed not found or invalid" });
+  }
 
   res.json({ message: "ok" });
 });
@@ -167,7 +233,7 @@ app.post("/provider", async (req, res) => {
 app.post("/fetch-facebook-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "facebook");
 
-  if (!provider) {
+  if (!provider || provider.type != "oauth") {
     return res.status(400).json({ message: "Facebook provider not found" });
   }
 
@@ -187,7 +253,7 @@ app.post("/fetch-facebook-posts", async (req, res) => {
 app.post("/fetch-github-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "github");
 
-  if (!provider) {
+  if (!provider || provider.type != "oauth") {
     return res.status(400).json({ message: "Github provider not found" });
   }
 
@@ -200,6 +266,23 @@ app.post("/fetch-github-posts", async (req, res) => {
   await setPosts(db, req.user, provider, posts);
 
   res.json({ message: "ok" });
+});
+
+app.post("/fetch-rss-posts", async (req, res) => {
+  const providers = req.user.providers.filter(({ type }) => type === "rss");
+
+  try {
+    for (const provider of providers) {
+      if ("url" in provider) {
+        const newPosts = await fetchRssPosts(provider);
+        const posts = mergePosts(req.user.syndication, newPosts);
+        await setWebFeed(db, req.user, provider, posts);
+      }
+    }
+    res.json({ message: "ok" });
+  } catch {
+    res.status(400).json({ message: "RSS feed not found or invalid" });
+  }
 });
 
 app.get("/users-to-follow", async (req, res) => {
@@ -232,19 +315,16 @@ app.get("/feed", async (req, res) => {
     .find({ uuid: { $in: req.user.follows } })
     .toArray();
 
-  const posts = followedUsers.map((user) => user.posts).flat();
+  const posts = followedUsers.map((user) => ({
+    user: user.uuid,
+    posts: user.posts,
+  })).flat();
+  const syndication = req.user.syndication;
+  const feed = posts.concat(syndication);
 
-  res.json(posts);
-});
+  // TODO add a date to each post and sort them
 
-app.post("/rss", async (req, res) => {
-  const url = req.body.url as string;
-  try {
-    const result = await extract(url);
-    res.json({ message: "ok", content: result });
-  } catch {
-    res.status(400).json({ message: "RSS feed not found or invalid" });
-  }
+  res.json(feed);
 });
 
 app.listen(3000);

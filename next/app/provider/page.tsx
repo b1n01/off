@@ -10,7 +10,7 @@ export default function Login() {
   const [user, setUser] = useState<Object | undefined>(undefined);
   const [isLoading, setLoading] = useState<boolean>(true);
   const [rss, setRss] = useState<string>("https://ilpost.it/feed");
-  const [rssRes, serRssRes] = useState<Object | undefined>(undefined);
+  const [rssRes, setRssRes] = useState<Object | undefined>(undefined);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -32,21 +32,28 @@ export default function Login() {
   const fetchGithubData = async () => {
     const repo = useRepo();
     const data = await repo.fetchGithubData();
-    setProviderRes(providerRes);
+    setProviderRes(data);
     router.refresh();
   };
 
   const fetchFacebookData = async () => {
     const repo = useRepo();
     const data = await repo.fetchFacebookData();
-    setProviderRes(providerRes);
+    setProviderRes(data);
+    router.refresh();
+  };
+
+  const fetchRSSData = async () => {
+    const repo = useRepo();
+    const data = await repo.fetchRSSData();
+    setProviderRes(data);
     router.refresh();
   };
 
   const enableRss = async () => {
     const repo = useRepo();
-    const data = await repo.sendRss({ url: rss });
-    serRssRes(data);
+    const data = await repo.sendRSSProvider({ url: rss });
+    setRssRes(data);
     router.refresh();
   };
 
@@ -63,6 +70,13 @@ export default function Login() {
           <button onClick={() => enabledProvider("facebook")}>Facebook</button>
         </div>
         <hr></hr>
+        <p>Here you can add RSS:</p>
+        <input value={rss} onChange={(e) => setRss(e.target.value)}></input>
+        <div>
+          <button onClick={enableRss}>Send RSS</button>
+        </div>
+        <pre><code>{JSON.stringify(rssRes, null, 4)}</code></pre>
+        <hr></hr>
         <p>Here you can fetch data from providers:</p>
         <div>
           <button onClick={fetchGithubData}>Github</button>
@@ -70,14 +84,10 @@ export default function Login() {
         <div>
           <button onClick={fetchFacebookData}>Facebook</button>
         </div>
-        <p>{JSON.stringify(providerRes)}</p>
-        <hr></hr>
-        <p>Here you can add RSS:</p>
-        <input value={rss} onChange={(e) => setRss(e.target.value)}></input>
         <div>
-          <button onClick={enableRss}>Send RSS</button>
+          <button onClick={fetchRSSData}>RSS</button>
         </div>
-        <pre><code>{JSON.stringify(rssRes, null, 4)}</code></pre>
+        <pre><code>{JSON.stringify(providerRes, null, 4)}</code></pre>
       </main>
     );
   } else {
