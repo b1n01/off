@@ -28,21 +28,33 @@ authPassport.use(
     ...FACEBOOK_CREDENTIALS,
     callbackURL: "/api/facebook/auth/callback",
   }, function (_accessToken, _refreshToken, profile, callback) {
-    return callback(null, { id: profile.id, provider: "facebook" });
+    return callback(null, {
+      id: profile.id,
+      name: profile.displayName,
+      provider: "facebook",
+    });
   }),
 ).use(
   new GitHubStrategy({
     ...GITHUB_CREDENTIALS,
     callbackURL: "/api/github/auth/callback",
   }, function (_accessToken, _refreshToken, profile, callback) {
-    return callback(null, { id: profile.id, provider: "github" });
+    return callback(null, {
+      id: profile.id,
+      name: profile.displayName,
+      provider: "github",
+    });
   }),
 ).use(
   new GoogleStrategy({
     ...GOOGLE_CREDENTIALS,
     callbackURL: "/api/google/auth/callback",
   }, function (_accessToken, _refreshToken, profile, callback) {
-    return callback(null, { id: profile.id, provider: "google" });
+    return callback(null, {
+      id: profile.id,
+      name: profile.displayName,
+      provider: "google",
+    });
   }),
 );
 
@@ -136,8 +148,9 @@ export async function authenticated(
       await setData({ value, response });
     } else {
       const accessToken = request.user.accessToken;
+      const name = request.user.name;
       const repo = useRepoFromPages({ request });
-      await repo.sendOAuthProvider({ accessToken, provider });
+      await repo.sendOAuthProvider({ accessToken, name, provider });
     }
 
     response.redirect("/");

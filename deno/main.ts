@@ -13,14 +13,13 @@ import {
   type Response,
 } from "./deps.ts";
 import {
-  FacebookPost,
-  GithubPost,
+  FacebookPostData,
+  GithubPostData,
   GithubUser,
   OAuthProvider,
   Post,
   Provider,
-  RSSPost,
-  RSSProvider,
+  SyndicationProvider,
   User,
 } from "./types.ts";
 
@@ -37,18 +36,23 @@ const db = mongo.db("off");
 const users = db.collection("users");
 users.createIndex({ uuid: 1 });
 
+//------
+// POSTS
+//------
+
 const fetchGithubPosts = async ({ accessToken }: OAuthProvider) => {
   const octokit = new Octokit({ auth: accessToken });
   const userRes = await octokit.request("GET /user") as { data: GithubUser };
   const eventsRes = await octokit.request("GET /users/{username}/events", {
     username: userRes.data.login,
-  }) as { data: GithubPost[] };
+  }) as { data: GithubPostData[] };
 
-  return eventsRes.data.map((event) => ({
-    provider: "github" as const,
-    type: "event",
-    id: `github-event-${event.id}`,
-    data: event as unknown,
+  return eventsRes.data.map((post) => ({
+    id: `github-${post.id}`,
+    type: "oauth",
+    provider: "github",
+    timestamp: post.created_at ?? new Date().toISOString(),
+    data: post,
   }));
 };
 
@@ -64,24 +68,27 @@ const fetchFacebookPosts = async ({ accessToken }: OAuthProvider) => {
     &access_token=${accessToken}`,
   );
 
-  const postRes = await data.json() as { data: FacebookPost[] };
+  const postRes = await data.json() as { data: FacebookPostData[] };
 
   return postRes.data.map((post) => ({
-    provider: "facebook" as const,
-    type: "post",
-    id: `facebook-event-${post.id}`,
-    data: post as unknown,
+    id: `facebook-${post.id}`,
+    type: "oauth",
+    provider: "facebook",
+    timestamp: post.created_time,
+    data: post,
   }));
 };
 
-const fetchRssPosts = async ({ url, name }: RSSProvider) => {
-  const postRes = await extract(url) as { entries: RSSPost[] };
-  return postRes.entries.map((post) => ({
-    provider: name,
-    type: "rss",
+const fetchSyndicationPosts = async ({ url, name }: SyndicationProvider) => {
+  const postRes = await extract(url);
+
+  return postRes?.entries?.map((post) => ({
     id: `${url}-${post.id}`,
+    type: "syndication",
+    provider: name,
+    timestamp: new Date(post?.published ?? Date()).toISOString(),
     data: post,
-  }));
+  })) ?? [];
 };
 
 function mergePosts(oldPosts: Post[], newPosts: Post[]): Post[] {
@@ -98,7 +105,12 @@ function isUptodate(date: string) {
   return new Date(date).getTime() > oneHourAgo;
 }
 
-async function setPosts(db: Db, user: User, provider: Provider, posts: Post[]) {
+async function setOAuthPosts(
+  db: Db,
+  user: User,
+  provider: Provider,
+  posts: Post[],
+) {
   return await db.collection("users").updateOne(
     { uuid: user.uuid, "providers.name": provider.name },
     {
@@ -108,7 +120,7 @@ async function setPosts(db: Db, user: User, provider: Provider, posts: Post[]) {
   );
 }
 
-async function setWebFeed(
+async function setSyndicationPosts(
   db: Db,
   user: User,
   provider: Provider,
@@ -122,6 +134,10 @@ async function setWebFeed(
     },
   );
 }
+
+//-----
+// AUTH
+//-----
 
 async function firewall(req: Request, res: Response, next: NextFunction) {
   try {
@@ -163,6 +179,10 @@ async function userProvider(req: Request, _res: Response, next: NextFunction) {
   next();
 }
 
+//----
+// JWT
+//----
+
 async function getDerivedKey(secret: string) {
   return await hkdf("sha256", secret, "", "Off Encryption Key", 32);
 }
@@ -176,10 +196,17 @@ async function decodeJwt(jwt: string) {
   };
 }
 
+//--------
+// ACTIONS
+//--------
+
+/** Get the logged user */
 app.get("/", (req, res) => {
+  // TODO: this is leaking auth data
   res.json(req.user);
 });
 
+/** Adds an OAuth provider */
 app.post("/provider/oauth", async (req, res) => {
   const accessToken = req.body.accessToken;
   const name = req.body.provider;
@@ -202,14 +229,15 @@ app.post("/provider/oauth", async (req, res) => {
   res.json({ message: "ok" });
 });
 
-app.post("/provider/rss", async (req, res) => {
+/** Adds a syndication provider */
+app.post("/provider/syndication", async (req, res) => {
   const url = req.body.url as string;
 
   try {
     const data = await extract(url);
     const name = data.title;
     const lastFetch = null;
-    const type = "rss";
+    const type = "syndication";
     const provider = { name, url, lastFetch, type };
 
     const result = await db.collection("users").updateOne(
@@ -223,13 +251,14 @@ app.post("/provider/rss", async (req, res) => {
         { $push: { providers: provider } },
       );
     }
-  } catch {
-    res.status(400).json({ message: "RSS feed not found or invalid" });
+  } catch (e) {
+    res.status(400).json({ message: "Syndication feed not found or invalid" });
   }
 
   res.json({ message: "ok" });
 });
 
+/** Fetches posts from facebook provider */
 app.post("/fetch-facebook-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "facebook");
 
@@ -245,11 +274,12 @@ app.post("/fetch-facebook-posts", async (req, res) => {
 
   const newPosts = await fetchFacebookPosts(provider);
   const posts = mergePosts(req.user.posts, newPosts);
-  await setPosts(db, req.user, provider, posts);
+  await setOAuthPosts(db, req.user, provider, posts);
 
   res.json({ message: "ok" });
 });
 
+/** Fetches posts from github provider */
 app.post("/fetch-github-posts", async (req, res) => {
   const provider = req.user.providers.find(({ name }) => name === "github");
 
@@ -263,34 +293,42 @@ app.post("/fetch-github-posts", async (req, res) => {
 
   const newPosts = await fetchGithubPosts(provider);
   const posts = mergePosts(req.user.posts, newPosts);
-  await setPosts(db, req.user, provider, posts);
+  await setOAuthPosts(db, req.user, provider, posts);
 
   res.json({ message: "ok" });
 });
 
-app.post("/fetch-rss-posts", async (req, res) => {
-  const providers = req.user.providers.filter(({ type }) => type === "rss");
+/** Fetch post from all syndication providers */
+app.post("/fetch-syndication-posts", async (req, res) => {
+  const providers = req.user.providers.filter(({ type }) =>
+    type === "syndication"
+  );
 
   try {
     for (const provider of providers) {
       if ("url" in provider) {
-        const newPosts = await fetchRssPosts(provider);
+        const newPosts = await fetchSyndicationPosts(provider);
         const posts = mergePosts(req.user.syndication, newPosts);
-        await setWebFeed(db, req.user, provider, posts);
+        await setSyndicationPosts(db, req.user, provider, posts);
       }
     }
     res.json({ message: "ok" });
-  } catch {
-    res.status(400).json({ message: "RSS feed not found or invalid" });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json({ message: "Syndication feed not found or invalid" });
   }
 });
 
-app.get("/users-to-follow", async (req, res) => {
-  const usersToFollow = await db.collection<User>("users")
+/**
+ * Gets a list of users. Each user it's uuid and wheter it followed by the
+ * logged user
+ */
+app.get("/users", async (req, res) => {
+  const users = await db.collection<User>("users")
     .find({ uuid: { $ne: req.user.uuid } })
     .toArray();
 
-  const data = usersToFollow.map((user) => ({
+  const data = users.map((user) => ({
     uuid: user.uuid,
     following: req.user.follows.includes(user.uuid),
   }));
@@ -298,6 +336,7 @@ app.get("/users-to-follow", async (req, res) => {
   res.json(data);
 });
 
+/** Follow a user */
 app.post("/follow", async (req, res) => {
   const uuid = req.body.uuid as string;
   const users = db.collection("users");
@@ -310,19 +349,26 @@ app.post("/follow", async (req, res) => {
   res.json({ message: "ok" });
 });
 
+/**
+ * Returns the user feed. The feed is composed by posts of followed users and
+ * by web syndication posts
+ */
 app.get("/feed", async (req, res) => {
   const followedUsers = await db.collection<User>("users")
     .find({ uuid: { $in: req.user.follows } })
     .toArray();
 
-  const posts = followedUsers.map((user) => ({
-    user: user.uuid,
+  // TODO: user info should be child each post, not father
+  const usersPosts = followedUsers.map((user) => ({
+    user: user.auth.name,
     posts: user.posts,
   })).flat();
-  const syndication = req.user.syndication;
-  const feed = posts.concat(syndication);
 
-  // TODO add a date to each post and sort them
+  const syndicationPosts = req.user.syndication;
+
+  const feed = [...usersPosts, ...syndicationPosts];
+
+  // TODO: add a date to each post and sort them
 
   res.json(feed);
 });

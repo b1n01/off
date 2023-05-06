@@ -2,7 +2,7 @@
 
 ## Fetaures
  
-- [x] RSS provider 
+- [x] Syndication provider 
 - [ ] Facebook webhooks
 - [ ] Github webhooks
 

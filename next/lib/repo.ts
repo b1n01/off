@@ -45,7 +45,7 @@ export function useRepo(
 
     /** Adds an oauth provider to the logged user */
     sendOAuthProvider: function (
-      data: { accessToken: string; provider: string },
+      data: { accessToken: string; name: string; provider: string },
     ) {
       return send({
         endpoint: new URL("provider/oauth", url).href,
@@ -56,11 +56,11 @@ export function useRepo(
       }) as Promise<{ message: string }>;
     },
 
-    /** Adds a RSS provider to the logged user */
-    sendRSSProvider: function ({ url: rss }: { url: string }) {
+    /** Adds a Syndication provider to the logged user */
+    sendSyndicationProvider: function ({ url: syndication }: { url: string }) {
       return send({
-        endpoint: new URL("provider/rss", url).href,
-        options: { method: "POST", body: JSON.stringify({ url: rss }) },
+        endpoint: new URL("provider/syndication", url).href,
+        options: { method: "POST", body: JSON.stringify({ url: syndication }) },
       }) as Promise<{ message: string }>;
     },
 
@@ -80,9 +80,9 @@ export function useRepo(
       }) as Promise<{ message: string }>;
     },
 
-    fetchRSSData: function () {
+    fetchSyndicationData: function () {
       return send({
-        endpoint: new URL("fetch-rss-posts", url).href,
+        endpoint: new URL("fetch-syndication-posts", url).href,
         options: { method: "POST" },
       }) as Promise<{ message: string }>;
     },
@@ -90,7 +90,7 @@ export function useRepo(
     /** Get a list of user to follow */
     getUsersToFollow: async function () {
       return send({
-        endpoint: new URL("users-to-follow", url).href,
+        endpoint: new URL("users", url).href,
       }) as Promise<[{ uuid: string; following: boolean }]>;
     },
 

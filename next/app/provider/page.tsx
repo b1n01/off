@@ -9,8 +9,12 @@ export default function Login() {
   const [providerRes, setProviderRes] = useState<Object | undefined>(undefined);
   const [user, setUser] = useState<Object | undefined>(undefined);
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [rss, setRss] = useState<string>("https://ilpost.it/feed");
-  const [rssRes, setRssRes] = useState<Object | undefined>(undefined);
+  const [syndication, setSyndication] = useState<string>(
+    "https://ilpost.it/feed",
+  );
+  const [syndicationRes, setSyndicationRes] = useState<Object | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -43,17 +47,17 @@ export default function Login() {
     router.refresh();
   };
 
-  const fetchRSSData = async () => {
+  const fetchSyndicationData = async () => {
     const repo = useRepo();
-    const data = await repo.fetchRSSData();
+    const data = await repo.fetchSyndicationData();
     setProviderRes(data);
     router.refresh();
   };
 
-  const enableRss = async () => {
+  const enableSyndication = async () => {
     const repo = useRepo();
-    const data = await repo.sendRSSProvider({ url: rss });
-    setRssRes(data);
+    const data = await repo.sendSyndicationProvider({ url: syndication });
+    setSyndicationRes(data);
     router.refresh();
   };
 
@@ -70,12 +74,16 @@ export default function Login() {
           <button onClick={() => enabledProvider("facebook")}>Facebook</button>
         </div>
         <hr></hr>
-        <p>Here you can add RSS:</p>
-        <input value={rss} onChange={(e) => setRss(e.target.value)}></input>
+        <p>Here you can add Syndication Feed:</p>
+        <input
+          value={syndication}
+          onChange={(e) => setSyndication(e.target.value)}
+        >
+        </input>
         <div>
-          <button onClick={enableRss}>Send RSS</button>
+          <button onClick={enableSyndication}>Add</button>
         </div>
-        <pre><code>{JSON.stringify(rssRes, null, 4)}</code></pre>
+        <pre><code>{JSON.stringify(syndicationRes, null, 4)}</code></pre>
         <hr></hr>
         <p>Here you can fetch data from providers:</p>
         <div>
@@ -85,7 +93,7 @@ export default function Login() {
           <button onClick={fetchFacebookData}>Facebook</button>
         </div>
         <div>
-          <button onClick={fetchRSSData}>RSS</button>
+          <button onClick={fetchSyndicationData}>Syndication</button>
         </div>
         <pre><code>{JSON.stringify(providerRes, null, 4)}</code></pre>
       </main>
