@@ -251,7 +251,7 @@ app.post("/provider/syndication", async (req, res) => {
         { $push: { providers: provider } },
       );
     }
-  } catch (e) {
+  } catch {
     res.status(400).json({ message: "Syndication feed not found or invalid" });
   }
 
@@ -358,17 +358,26 @@ app.get("/feed", async (req, res) => {
     .find({ uuid: { $in: req.user.follows } })
     .toArray();
 
-  // TODO: user info should be child each post, not father
-  const usersPosts = followedUsers.map((user) => ({
-    user: user.auth.name,
-    posts: user.posts,
-  })).flat();
+  const usersPosts = followedUsers.map((user) => (
+    user.posts.map((post) => ({
+      user: {
+        name: user.auth.name,
+        uuid: user.uuid,
+      },
+      ...post,
+    }))
+  )).flat();
 
   const syndicationPosts = req.user.syndication;
-
   const feed = [...usersPosts, ...syndicationPosts];
 
-  // TODO: add a date to each post and sort them
+  feed.sort((a, b) => {
+    const aTime = new Date(a.timestamp);
+    const bTime = new Date(b.timestamp);
+    if (aTime < bTime) return 1;
+    if (aTime > bTime) return -1;
+    return 0;
+  });
 
   res.json(feed);
 });

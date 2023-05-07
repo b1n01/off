@@ -8,6 +8,7 @@ export default async function Home() {
     const posts = await repo.getFeed();
     return (
       <main>
+        <p>Total posts: {posts.length}</p>
         <pre><code>{JSON.stringify(posts, null, 4)}</code></pre>
       </main>
     );
