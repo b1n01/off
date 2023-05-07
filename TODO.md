@@ -13,5 +13,5 @@
 - [x] Use async/await only where needed
 - [x] Repo proxy should handle errors
 - [x] Interface for providers
-- [ ] Save user name on sign-up
-- [ ] Save posts date to sort them
+- [x] Save user name on sign-up
+- [x] Save posts date to sort them
