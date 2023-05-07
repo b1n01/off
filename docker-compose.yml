@@ -1,6 +1,6 @@
 services:
-  deno:
-    container_name: off-deno
+  api:
+    container_name: off-api
     image: lukechannings/deno:v1.31.3
     # image: denoland/deno:1.31.3 # use this when official docker image for arm64 will be released, @see https://github.com/denoland/deno_docker/issues/100
     ports:
@@ -10,21 +10,21 @@ services:
         condition: service_healthy
     working_dir: /usr/src
     volumes:
-      - ./deno:/usr/src:cached
+      - ./api:/usr/src:cached
     entrypoint: /bin/bash
     command: -c "deno cache main.ts && deno run --allow-all --watch main.ts" 
 
-  next:
-    container_name: off-next
+  web:
+    container_name: off-web
     image: node:19-alpine
     ports:
       - 3000:3000
     depends_on:
-      - deno
+      - api
     working_dir: /usr/src
     volumes:
-     - ./next:/usr/src:cached
-     - ./deno/types.ts:/usr/deno/types.ts:ro
+     - ./web:/usr/src:cached
+     - ./api/types.ts:/usr/api/types.ts:ro
     command: /bin/ash -c "npm i && npm run dev"
 
   mongo:

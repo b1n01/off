@@ -12,7 +12,8 @@ export default async function Home() {
         <pre><code>{JSON.stringify(posts, null, 4)}</code></pre>
       </main>
     );
-  } catch {
+  } catch (e) {
+    console.log(e);
     return (
       <p>
         You are not logged in, go to <Link href="/login">login page</Link>
