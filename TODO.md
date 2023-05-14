@@ -3,6 +3,9 @@
 ## Fetaures
  
 - [x] Syndication provider 
+- [ ] Hide authentication section
+- [ ] Sign-in page
+- [ ] Puplic wall
 - [ ] Facebook webhooks
 - [ ] Github webhooks
 
