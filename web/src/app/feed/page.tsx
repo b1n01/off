@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { useRepo } from "@/lib/server/repo";
+import { withRepo } from "@/lib/server/repo";
 
 export default async function Home() {
-  const repo = useRepo();
+  const repo = withRepo();
 
   try {
     const posts = await repo.getFeed();

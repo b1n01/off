@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isFetchException } from "@/types/main";
-import { useRepo } from "@/lib/server/repo";
+import { withRepo } from "@/lib/server/repo";
 
 async function handle({ request }: { request: NextRequest }) {
-  const repo: Record<string, any> = useRepo();
+  const repo: Record<string, any> = withRepo();
   const callables = Object.getOwnPropertyNames(repo);
   const method = new URL(request.url).pathname.replace("/repo/proxy/", "");
 

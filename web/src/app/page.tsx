@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getData, getToken } from "@/lib/server/session";
-import { useRepo } from "@/lib/server/repo";
+import { withRepo } from "@/lib/server/repo";
 
 export default async function Home() {
-  const repo = useRepo();
+  const repo = withRepo();
   const session = await getData();
   const token = getToken();
 

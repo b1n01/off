@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useRepo } from "@/lib/client/repo";
+import { withRepo } from "@/lib/client/repo";
 
 export default function FollowButton(
   { uuid, following }: { uuid: string; following: boolean },
@@ -9,7 +9,7 @@ export default function FollowButton(
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [isFollowing, setFollowing] = useState(following);
-  const repo = useRepo();
+  const repo = withRepo();
 
   const follow = async () => {
     setSaving(true);

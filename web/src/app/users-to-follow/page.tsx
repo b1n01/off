@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { useRepo } from "@/lib/server/repo";
+import { withRepo } from "@/lib/server/repo";
 import FollowButton from "@/app/users-to-follow/FollowButton";
 
 export default async function Home() {
-  const repo = useRepo();
+  const repo = withRepo();
 
   try {
     const data = await repo.getUsersToFollow();

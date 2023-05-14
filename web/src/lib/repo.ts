@@ -1,7 +1,7 @@
 import type { TokenFetcher } from "@/types/main";
 import type { Post, User } from "@backend/types";
 
-export function useRepo(
+export function withRepo(
   { fetcher, url }: { fetcher: TokenFetcher; url: string },
 ) {
   /** Get common fetch options */

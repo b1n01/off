@@ -1,12 +1,12 @@
-import { useRepo as useMainRepo } from "@/lib/repo";
+import { withRepo as withMainRepo } from "@/lib/repo";
 
 /**
  * This is a proxy of the real repo. It calls an API that executes the real
  * repo loginc and returns the result.
  */
-export function useRepo() {
+export function withRepo() {
   const fakeFetcher = () => "";
-  const mainRepo = useMainRepo({ fetcher: fakeFetcher, url: "" });
+  const mainRepo = withMainRepo({ fetcher: fakeFetcher, url: "" });
 
   const repo = {} as typeof mainRepo;
   for (const method of Object.getOwnPropertyNames(mainRepo)) {

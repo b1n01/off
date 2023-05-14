@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRepo } from "@/lib/client/repo";
+import { withRepo } from "@/lib/client/repo";
 
 export default function Login() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function Login() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const repo = useRepo();
+        const repo = withRepo();
         const user = await repo.getUser();
         setUser(user);
       } finally {
@@ -34,28 +34,28 @@ export default function Login() {
   }
 
   const fetchGithubData = async () => {
-    const repo = useRepo();
+    const repo = withRepo();
     const data = await repo.fetchGithubData();
     setProviderRes(data);
     router.refresh();
   };
 
   const fetchFacebookData = async () => {
-    const repo = useRepo();
+    const repo = withRepo();
     const data = await repo.fetchFacebookData();
     setProviderRes(data);
     router.refresh();
   };
 
   const fetchSyndicationData = async () => {
-    const repo = useRepo();
+    const repo = withRepo();
     const data = await repo.fetchSyndicationData();
     setProviderRes(data);
     router.refresh();
   };
 
   const enableSyndication = async () => {
-    const repo = useRepo();
+    const repo = withRepo();
     const data = await repo.sendSyndicationProvider({ url: syndication });
     setSyndicationRes(data);
     router.refresh();
