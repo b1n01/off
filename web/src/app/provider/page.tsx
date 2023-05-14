@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRepo } from "lib/client/repo";
+import { useRepo } from "@/lib/client/repo";
 
 export default function Login() {
   const router = useRouter();

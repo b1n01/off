@@ -1,4 +1,4 @@
-import { useRepo as useMainRepo } from "lib/repo";
+import { useRepo as useMainRepo } from "@/lib/repo";
 
 /**
  * This is a proxy of the real repo. It calls an API that executes the real

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { useRepo } from "lib/server/repo";
-import FollowButton from "app/users-to-follow/FollowButton";
+import { useRepo } from "@/lib/server/repo";
+import FollowButton from "@/app/users-to-follow/FollowButton";
 
 export default async function Home() {
   const repo = useRepo();

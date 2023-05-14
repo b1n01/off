@@ -1,4 +1,4 @@
-import type { TokenFetcher } from "types/main";
+import type { TokenFetcher } from "@/types/main";
 import type { Post, User } from "@backend/types";
 
 export function useRepo(

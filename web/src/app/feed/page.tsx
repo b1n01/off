@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useRepo } from "lib/server/repo";
+import { useRepo } from "@/lib/server/repo";
 
 export default async function Home() {
   const repo = useRepo();

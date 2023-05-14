@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { createRouter } from "next-connect";
-import { authenticate } from "lib/server/auth";
+import { authenticate } from "@/lib/server/auth";
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
 

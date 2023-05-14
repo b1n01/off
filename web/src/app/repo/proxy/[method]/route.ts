@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isFetchException } from "types/main";
-import { useRepo } from "lib/server/repo";
+import { isFetchException } from "@/types/main";
+import { useRepo } from "@/lib/server/repo";
 
 async function handle({ request }: { request: NextRequest }) {
   const repo: Record<string, any> = useRepo();

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useRepo } from "lib/client/repo";
+import { useRepo } from "@/lib/client/repo";
 
 export default function FollowButton(
   { uuid, following }: { uuid: string; following: boolean },

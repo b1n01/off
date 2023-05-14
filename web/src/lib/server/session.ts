@@ -1,5 +1,5 @@
-import { getCookie, setCookie } from "lib/server/cookie";
-import { decode, encode } from "lib/jwt";
+import { getCookie, setCookie } from "@/lib/server/cookie";
+import { decode, encode } from "@/lib/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 
 const SECRET = process.env.APP_SECRET as string;

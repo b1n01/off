@@ -4,8 +4,8 @@ import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GitHubStrategy } from "passport-github";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
-import { setData } from "lib/server/session";
-import { useRepoFromPages } from "lib/server/repo";
+import { setData } from "@/lib/server/session";
+import { useRepoFromPages } from "@/lib/server/repo";
 
 const FACEBOOK_CREDENTIALS = {
   clientID: process.env.FACEBOOK_APP_ID as string,

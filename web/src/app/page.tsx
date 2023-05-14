@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { getData, getToken } from "lib/server/session";
-import { useRepo } from "lib/server/repo";
+import { getData, getToken } from "@/lib/server/session";
+import { useRepo } from "@/lib/server/repo";
 
 export default async function Home() {
   const repo = useRepo();
