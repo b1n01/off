@@ -1,12 +1,11 @@
 import { ReactNode } from "react";
-import "@/style/globals.css";
+import Header from "@/app/(board)/Header";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html>
-      <body>
-        {children}
-      </body>
-    </html>
+    <>
+      <Header />
+      {children}
+    </>
   );
 }
