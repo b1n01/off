@@ -140,7 +140,6 @@ async function setSyndicationPosts(
 //-----
 
 async function firewall(req: Request, res: Response, next: NextFunction) {
-  console.log("auth");
   try {
     const token: string | undefined = req.get("Authorization");
     if (!token) throw new Deno.errors.PermissionDenied();
@@ -314,8 +313,7 @@ app.post("/fetch-syndication-posts", async (req, res) => {
       }
     }
     res.json({ message: "ok" });
-  } catch (e) {
-    console.log(e);
+  } catch {
     res.status(400).json({ message: "Syndication feed not found or invalid" });
   }
 });

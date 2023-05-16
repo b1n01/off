@@ -7,7 +7,7 @@ export function withRepo() {
   return withMainRepo({ fetcher: getToken, url: API_URL });
 }
 
-export function withRepoFrompages(
+export function withRepoFromPages(
   { request }: { request: NextApiRequest },
 ) {
   const fetcher = () => getToken({ request });
