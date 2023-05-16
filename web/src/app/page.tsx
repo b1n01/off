@@ -6,7 +6,7 @@ import Header from "@/app/(board)/Header";
 export default async function Home() {
   const repo = withRepo();
   const session = await getData();
-  const token = getToken();
+  const token = await getToken();
 
   try {
     const user = await repo.getUser();

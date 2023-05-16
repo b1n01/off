@@ -1,6 +1,7 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
 import { getCookie, setCookie } from "@/lib/server/cookie";
 import { decode, encode } from "@/lib/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
 
 const SECRET = process.env.APP_SECRET as string;
 
@@ -12,15 +13,19 @@ function getCookieName() {
 }
 
 /** Returns the session token (JWT stored in the session cookie) */
-export function getToken({ request }: { request?: NextApiRequest } = {}) {
+export async function getToken(
+  { request }: { request?: NextApiRequest | NextRequest } = {},
+) {
   const name = getCookieName();
 
-  return getCookie({ name, request });
+  return await getCookie({ name, request });
 }
 
 /** Returns the content of the session */
-export async function getData({ request }: { request?: NextApiRequest } = {}) {
-  const token = getToken({ request });
+export async function getData(
+  { request }: { request?: NextApiRequest | NextRequest } = {},
+) {
+  const token = await getToken({ request });
 
   return token ? await decode({ token, secret: SECRET }) : undefined;
 }

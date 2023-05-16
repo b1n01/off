@@ -1,6 +1,6 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest } from "next/server";
 import { serialize } from "cookie";
-import { cookies } from "next/headers";
-import { NextApiRequest, NextApiResponse } from "next";
 
 /** Set a cookie */
 export function setCookie(
@@ -21,13 +21,20 @@ export function setCookie(
 }
 
 /** Returns the value of a cookie */
-export function getCookie(
-  { name, request }: { name: string; request?: NextApiRequest },
+export async function getCookie(
+  { name, request }: { name: string; request?: NextApiRequest | NextRequest },
 ) {
   if (request) {
-    return request.cookies?.[name];
+    if ("query" in request) {
+      // "query" axists as attributes only in NextApiRequest
+      return request.cookies?.[name];
+    } else {
+      // Here request is a NextRequest
+      return request.cookies.get(name)?.value;
+    }
   } else {
-    const cookieStore = cookies();
+    const headers = await import("next/headers");
+    const cookieStore = headers.cookies();
     const cookie = cookieStore.get(name);
     return cookie?.value;
   }

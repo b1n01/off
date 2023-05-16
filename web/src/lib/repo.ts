@@ -5,11 +5,11 @@ export function withRepo(
   { fetcher, url }: { fetcher: TokenFetcher; url: string },
 ) {
   /** Get common fetch options */
-  function getOptions() {
+  async function getOptions() {
     return {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${fetcher()}`,
+        "Authorization": `Bearer ${await fetcher()}`,
       },
     };
   }
@@ -18,7 +18,7 @@ export function withRepo(
   async function send(
     { endpoint, options }: { endpoint: string; options?: object },
   ): Promise<object> {
-    const defaultOptions = getOptions();
+    const defaultOptions = await getOptions();
 
     const response = await fetch(endpoint, {
       ...defaultOptions,

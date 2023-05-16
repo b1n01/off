@@ -2,7 +2,7 @@ import type { NextApiRequest } from "next";
 
 export type TokenFetcher = (
   props?: { request?: NextApiRequest },
-) => string | undefined;
+) => Promise<string | undefined>;
 
 export type Exception = {
   type: string;
