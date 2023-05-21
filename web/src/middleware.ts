@@ -2,13 +2,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getData } from "@/lib/server/session";
 
 const publicPaths = [
-  // NextJs paths
-  new RegExp("^/_next/(image|static).*"),
+  // Next.js paths
+  new RegExp("^/_next/(image|static)"),
   new RegExp("^/favicon.ico$"),
 
+  // Auth
+  new RegExp("^/api/(github|facebook|google)/(auth|data)(/callback)?$"),
+
   // Public routes
-  new RegExp("^/login$"),
   new RegExp("^/$"),
+  new RegExp("^/login$"),
 ];
 
 export async function middleware(request: NextRequest) {
