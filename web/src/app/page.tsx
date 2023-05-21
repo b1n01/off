@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getData, getToken } from "@/lib/server/session";
 import { withRepo } from "@/lib/server/repo";
-import Header from "@/app/(board)/Header";
+import { Header } from "@/components/Header";
+import { Button } from "@/components/Button";
 
 export default async function Home() {
   const repo = withRepo();
@@ -30,12 +30,10 @@ export default async function Home() {
     );
   } catch {
     return (
-      <main>
-        <p>Off Landing Page Here</p>
-        <p>
-          Go <Link href="/login">HERE</Link> to sign-in
-        </p>
-      </main>
+      <>
+        Off Landing Page Here
+        <Button href="/login">Sign in</Button>
+      </>
     );
   }
 }
