@@ -3,7 +3,7 @@ import "@/style/globals.css";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html>
+    <html className="bg-neutral-800 text-slate-50">
       <body>
         {children}
       </body>
