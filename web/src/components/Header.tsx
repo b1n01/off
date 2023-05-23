@@ -9,6 +9,7 @@ export async function Header() {
   const links = (
     <div className="ml-8 flex space-x-8 text-sm font-semibold">
       <Link href="/">Home</Link>
+      <Link href="/wall">Wall</Link>
       <Link href="/feed">Your feed</Link>
       <Link href="/users-to-follow">Users to follow</Link>
       <Link href="/provider">Providers</Link>
@@ -19,7 +20,7 @@ export async function Header() {
     <Button className="ml-auto" href="/login">Sign in</Button>
   );
   const signOutButton = (
-    <Button className="ml-auto" subtle={true} href="/logout">Sign out</Button>
+    <Button className="ml-auto" subtle={true}>Sign out</Button>
   );
 
   return (
