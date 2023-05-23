@@ -19,7 +19,7 @@ export default function Login() {
             Sign in with Google
           </Button>
         </div>
-        <div className="text-center text-xs mt-12 text-slate-400">
+        <div className="text-center text-xs mt-12 text-neutral-400">
           By continuing, you agree to Off Terms of Service and Privacy Policy
         </div>
       </div>
