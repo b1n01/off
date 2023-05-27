@@ -1,10 +1,15 @@
 # Prototype
 
+## Backlog
+
+- [x] Hide authentication section
+- [ ] Save syndication provider profile image
+- [ ] When the user signin with a provider store profile pic
+- [ ] Allow a user to pick unique handler
 ## Fetaures
  
 - [x] Syndication provider 
-- [ ] Hide authentication section
-- [ ] Sign-in page
+- [x] Sign-in page
 - [ ] Puplic wall
 - [ ] Facebook webhooks
 - [ ] Github webhooks
