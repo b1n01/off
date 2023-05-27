@@ -1,7 +1,7 @@
 services:
   api:
     container_name: off-api
-    image: lukechannings/deno:v1.31.3
+    image: lukechannings/deno:v1.34.0
     # image: denoland/deno:1.31.3 # use this when official docker image for arm64 will be released, @see https://github.com/denoland/deno_docker/issues/100
     ports:
       - 3001:3000
@@ -12,7 +12,7 @@ services:
     volumes:
       - ./api:/usr/src:cached
     entrypoint: /bin/bash
-    command: -c "deno cache main.ts && deno run --allow-all --watch main.ts" 
+    command: -c "deno cache deps.ts && deno run --allow-all --watch main.ts" 
 
   web:
     container_name: off-web
