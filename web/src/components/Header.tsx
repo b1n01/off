@@ -1,34 +1,56 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/Button";
 import { Logo } from "@/components/Logo";
 import { getData } from "@/lib/server/session";
+import profilePic from "@/../public/pic.png";
+import searchIcon from "@/../public/seatch.svg";
+
+function Divider() {
+  return <span className="border-l h-8 border-neutral-700"></span>;
+}
+
+function Account() {
+  return (
+    <Link href="/account">
+      <Image
+        src={profilePic}
+        width={32}
+        alt="Account icon"
+        className="rounded"
+      />
+    </Link>
+  );
+}
 
 export async function Header() {
   const session = await getData();
 
-  const links = (
-    <div className="ml-8 flex space-x-8 text-sm font-semibold">
+  const actions = (
+    <div className="flex space-x-8 text-sm font-bold items-center">
       <Link href="/">Home</Link>
       <Link href="/wall">Wall</Link>
-      <Link href="/feed">Your feed</Link>
-      <Link href="/users-to-follow">Users to follow</Link>
+      <Link href="/feed">Feed</Link>
+      <Link href="/users-to-follow">Follow</Link>
       <Link href="/provider">Providers</Link>
+      <Image
+        src={searchIcon}
+        width={16}
+        alt="Search icon"
+        className="hover:cursor-pointer"
+      />
+      <Divider />
     </div>
-  );
-
-  const signInButton = (
-    <Button className="ml-auto" href="/login">Sign in</Button>
-  );
-  const signOutButton = (
-    <Button className="ml-auto" subtle={true}>Sign out</Button>
   );
 
   return (
     <nav className="h-16 bg-neutral-800">
-      <div className="max-w-[1200px] p-4 flex h-full mx-auto items-center">
+      <div className="max-w-[1200px] flex h-full mx-auto">
         <Logo width={100} />
-        {session ? links : undefined}
-        {session ? signOutButton : signInButton}
+        <div className="flex space-x-8 ml-auto items-center">
+          {session ? actions : undefined}
+          {session ? <Account /> : <Button href="/login">Sign in</Button>}
+        </div>
       </div>
     </nav>
   );
