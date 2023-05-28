@@ -66,6 +66,7 @@ public
 - [ ] Syndication provider profile pic
 - [ ] User profile pic
 - [ ] Delete account
+- [ ] Responsive layout
 - [ ] Terms of service and privacy policy
 - [ ] Awesome landing page
 

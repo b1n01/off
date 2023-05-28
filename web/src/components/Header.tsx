@@ -4,7 +4,7 @@ import { Button } from "@/components/Button";
 import { Logo } from "@/components/Logo";
 import { getData } from "@/lib/server/session";
 import profilePic from "@/../public/pic.png";
-import searchIcon from "@/../public/seatch.svg";
+import searchIcon from "@/../public/search.svg";
 
 function Divider() {
   return <span className="border-l h-8 border-neutral-700"></span>;
