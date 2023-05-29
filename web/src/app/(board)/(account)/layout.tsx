@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MenuItem } from "@/app/(board)/(account)/MenuItems";
 import accountIcon from "@/../public/account.svg";
 import providerIcon from "@/../public/provider.svg";
+import debugIcon from "@/../public/info.svg";
 
 function Divider() {
   return <span className="border-l border-neutral-800 ml-[50px]"></span>;
@@ -23,6 +24,12 @@ export default function AccountLayour({ children }: { children: ReactNode }) {
           href="/providers"
         >
           Providers
+        </MenuItem>
+        <MenuItem
+          icon={<Image src={debugIcon} alt="debug icon" />}
+          href="/debug"
+        >
+          Debug
         </MenuItem>
       </div>
       <Divider />

@@ -28,11 +28,9 @@ export async function Header() {
 
   const actions = (
     <div className="flex space-x-8 text-sm font-bold items-center">
-      <Link href="/">Home</Link>
+      <Link href="/">Feed</Link>
       <Link href="/wall">Wall</Link>
-      <Link href="/feed">Feed</Link>
       <Link href="/users-to-follow">Follow</Link>
-      <Link href="/provider">Providers</Link>
       <Image
         src={searchIcon}
         width={16}
