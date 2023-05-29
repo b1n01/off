@@ -8,7 +8,7 @@ function Divider() {
   return <span className="border-t border-neutral-800 flex my-8"></span>;
 }
 
-export default function Account() {
+export default function Profile() {
   return (
     <div>
       <h1 className="font-bold text-xl">Profile</h1>

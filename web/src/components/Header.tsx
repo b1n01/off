@@ -12,7 +12,7 @@ function Divider() {
 
 function Account() {
   return (
-    <Link href="/account">
+    <Link href="/profile">
       <Image
         src={profilePic}
         width={32}
