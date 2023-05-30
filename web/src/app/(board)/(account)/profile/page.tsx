@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
+import { HanlderInput } from "@/app/(board)/(account)/profile/HandlerInput";
 import profilePic from "@/../public/pic.png";
-import checkIcon from "@/../public/check.svg";
 
 function Divider() {
   return <span className="border-t border-neutral-800 flex my-8"></span>;
@@ -21,17 +20,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-end space-x-2">
-        <Input
-          label="Handler"
-          placeholder="@handler"
-          rightIcon={<Image src={checkIcon} width={12} alt="check icon" />}
-        />
-        <Button variant="disabled">Save</Button>
-      </div>
-      <p className="text-sm mt-2 text-neutral-400">
-        Choose a unique handler for your account
-      </p>
+      <HanlderInput content="pizza" />
 
       <Divider />
 
