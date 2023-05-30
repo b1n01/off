@@ -3,28 +3,42 @@ import Link from "next/link";
 
 export function Button(
   {
-    children = null,
-    className = "",
-    subtle = false,
+    children,
+    className,
     href = "",
     useLink = true,
+    variant = "default",
   }: {
     children?: ReactNode;
     className?: string;
-    subtle?: boolean;
     href?: string;
     useLink?: boolean;
+    variant?: "default" | "subtle" | "disabled" | "danger";
   },
 ) {
+  let variantStyle;
+
+  switch (variant) {
+    case "subtle":
+      variantStyle =
+        "bg-neutral-800 hover:bg-neutral-700 active:bg-neutral-800";
+      break;
+    case "disabled":
+      variantStyle = "bg-neutral-800 text-neutral-500 hover:cursor-default";
+      break;
+    case "danger":
+      variantStyle = "bg-amber-600 hover:bg-orange-600 active:bg-orange-500";
+      break;
+    default:
+      variantStyle = "bg-violet-700 hover:bg-violet-600 active:bg-violet-700";
+      break;
+  }
+
   const props = {
     children,
     href,
-    className: `rounded px-4 py-2 text-center text-sm font-bold  
-     ${
-      subtle
-        ? "bg-neutral-800 border-neutral-700 hover:bg-[#585162] active:bg-[#645C70]"
-        : "bg-violet-700 hover:bg-violet-600 active:bg-violet-500"
-    } ${className}`,
+    className:
+      `rounded px-4 py-2 text-center text-sm font-bold ${variantStyle} ${className}`,
   };
 
   return props.href

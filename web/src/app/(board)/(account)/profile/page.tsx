@@ -17,7 +17,7 @@ export default function Profile() {
         <span className="text-sm">Picture</span>
         <div className="flex items-end space-x-2 mt-2">
           <Image src={profilePic} width={96} alt="profile picture" />
-          <Button>Edit</Button>
+          <Button variant="disabled">Edit (comint soon)</Button>
         </div>
       </div>
 
@@ -27,7 +27,7 @@ export default function Profile() {
           placeholder="@handler"
           rightIcon={<Image src={checkIcon} width={12} alt="check icon" />}
         />
-        <Button>Save</Button>
+        <Button variant="disabled">Save</Button>
       </div>
       <p className="text-sm mt-2 text-neutral-400">
         Choose a unique handler for your account
@@ -37,10 +37,10 @@ export default function Profile() {
 
       <h1 className="font-bold text-xl text-amber-600">Danger zone</h1>
 
-      <Button className="bg-amber-600 mt-8">Delete account</Button>
+      <Button variant="danger" className="mt-8">Delete account</Button>
 
       <p className="text-sm mt-2 text-neutral-400">
-        Delete your account forever
+        Delete your account permanently
       </p>
     </div>
   );
