@@ -20,7 +20,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <HanlderInput content="pizza" />
+      <HanlderInput />
 
       <Divider />
 

@@ -7,7 +7,8 @@ import warningIcon from "@/../public/warning.svg";
 import errorIcon from "@/../public/error.svg";
 import { useState } from "react";
 
-export function HanlderInput({ content = "" }: { content?: string }) {
+export function HanlderInput() {
+  const content = "handler";
   const [value, setValue] = useState(content);
   const [isDirty, setDirty] = useState(false);
   const [isChecking, setChecking] = useState(false);
