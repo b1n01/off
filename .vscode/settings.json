@@ -6,14 +6,10 @@
     "strings": true
   },
   "tailwindCSS.experimental.classRegex": [
-    // Match any variable with name ending in class or style, non-case sensitive and with plurals
-    // const style = "SUGGEST"; let variantClasses = 'SUGGEST';
-    "(?:(?:c|C)lass(?:es)?|(?:s|S)tyles?)\\s*=\\s*[\"'`]([\\s\\S]*?)[\"'`]",
-    // Match any property value of objects with name ending in class or style, non-case sensitive and with plurals
-    // const classes = {key:"SUGGEST"}; let style = {key:"SUGGEST"};
-    ["(?:(?:c|C)lass(?:es)?|(?:s|S)tyles?)\\s*=\\s*{[\\s\\S]*?:([^}]*)}", "[\"'`]([^\"'`]*)[\"'`]"],
-    // Match any string inside an array with name ending in class or style, non-case sensitive and with plurals
-    // const classes = ["SUGGEST"]; let style = ['SUGGEST', `SUGGEST`];
-    ["(?:(?:c|C)lass(?:es)?|(?:s|S)tyles?)\\s*=\\s*\\[([^}]*)\\]", "[\"'`]([^\"'`]*)[\"'`]"],
-  ],
+    // Enable IntelliSense on Outclass method calls outside "className" and "class" attributes
+    [
+      "\\.(?:parse|add|remove|set|with)\\s*\\(\\s*([\\s\\S]*?)\\s*\\)\\s*",
+      "[\"'`]([^\"'`]*)[\"'`]"
+    ]
+  ]
 }
